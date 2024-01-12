@@ -11,10 +11,6 @@ from CarObject import vehicle
 
 class Grid:
     def __init__(self, size):
-<<<<<<< HEAD
-        self.vehicle_dict = {}
-        self.vehicle_list = []
-=======
         """
         Initialize a Grid object for the Rush Hour game.
 
@@ -29,7 +25,6 @@ class Grid:
         """
         self.vehicle_dict = {}
         self.vehicle_list = []  # List of vehicles on the grid
->>>>>>> bf82142 (Documentatie toegevoegd)
         self.size = size
         # 2D grid initialization
         self.grid = [[None for _ in range(size)] for _ in range(size)]
