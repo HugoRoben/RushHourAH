@@ -7,4 +7,3 @@ class vehicle:
         self._y = row
         self._length = length
 
-    
