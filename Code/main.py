@@ -2,15 +2,14 @@ from GridObject import Grid
 import CarObject
 from Visualizer import Visualizer
 
-
 if __name__ == "__main__":
-
     grid = Grid(6)
-    grid.load_data('haha')
+    grid.load_data('gameboards/Rushhour6x6_1.csv')  # Adjusted to a valid file path
     Visualizer.draw(grid)
-    while(True):
+
+    while True:
         CarId = input("Which car: ")
-        steps = input("what direction do you want to move: ")
+        steps = input("What direction do you want to move: ")
 
         grid.move_vehicle(CarId, int(steps))
         Visualizer.draw(grid)
