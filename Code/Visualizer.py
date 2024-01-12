@@ -1,21 +1,57 @@
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import random
+from typing import Tuple
 
 def random_color():
+    """
+    Generate a random RGB color.
+
+    Returns:
+        Tuple[float, float, float]: A tuple representing an RGB color, with each component ranging from 0 to 1.
+    """
     return (random.random(), random.random(), random.random())
 
 class Visualizer:
+    """
+    A class to visualize the Rush Hour game grid using matplotlib.
+
+    Attributes:
+        color_map (dict): A dictionary mapping car IDs to their respective colors.
+    """
+
     color_map = {}
 
     @staticmethod
     def get_vehicle_color(car_id):
+        """
+        Get a consistent random color for a given vehicle. If the vehicle's color
+        does not exist in the color_map, it generates and assigns a new color.
+
+        Args:
+            car_id (str): The ID of the vehicle.
+
+        Returns:
+            Tuple[float, float, float]: The color (RGB tuple) associated with the vehicle.
+        """
         if car_id not in Visualizer.color_map:
             Visualizer.color_map[car_id] = random_color()
         return Visualizer.color_map[car_id]
 
     @staticmethod
     def draw(grid):
+        """
+        Draw the current state of the Rush Hour game grid using matplotlib.
+
+        Args:
+            grid (Grid): The game grid to be visualized.
+
+        Preconditions:
+            The grid must be an instance of the Grid class with a valid grid attribute.
+
+        Postconditions:
+            Displays the current state of the grid with each vehicle represented in a distinct color.
+        """
         fig, ax = plt.subplots()
         grid_size = len(grid.grid)
 
@@ -30,12 +66,15 @@ class Visualizer:
                 vehicle = grid.grid[grid_size - 1 - y][x]
                 if vehicle:
                     color = Visualizer.get_vehicle_color(vehicle._carid)
+                    # Special color for the 'X' vehicle (usually red)
                     if vehicle._carid == 'X': color = 'red'
+                    # Determine the orientation and draw the vehicle
                     if vehicle._orientation == 'H':
                         rect = patches.Rectangle((x, y), vehicle._length - 1, 1, edgecolor='black', facecolor=color)
                     else:
-                        rect = patches.Rectangle((x, y), 1, vehicle._length - 2, edgecolor='black', facecolor=color)
+                        rect = patches.Rectangle((x, y), 1, vehicle._length - 1, edgecolor='black', facecolor=color)
                     ax.add_patch(rect)
+                    # Add vehicle ID text on the vehicle
                     ax.text(x + 0.5, y + 0.5, str(vehicle._carid),
                             horizontalalignment='center', verticalalignment='center',
                             fontsize=8, color='white', weight='bold')
