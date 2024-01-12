@@ -1,10 +1,15 @@
 # File for the class of the grid
 
+# twee dingen bijhouden: 
+# - totale delta per auto
+# - alle stappen
+
 import csv
 from CarObject import vehicle
 
 class Grid:
     def __init__(self, size):
+        self.vehicle_dict = {}
         self.vehicle_list = []
         self.size = size
         self.grid = [[None for _ in range(size)] for _ in range(size)]
@@ -26,6 +31,8 @@ class Grid:
                     self.grid[y][x + i] = vehicle
                 else:
                     self.grid[y + i][x] = vehicle
+            # make a dictionary with key = carid, value = vehicle object
+            # self.vehicle_dict[vehicle._carid] = vehicle
             self.vehicle_list.append(vehicle)
 
     def is_space_available(self, vehicle):
@@ -83,9 +90,9 @@ class Grid:
         if self.size // 2 == 0: exit_row = self.size / 2
         else: exit_row = self.size // 2
         # scan in the exit row for the red car (car with id 'X')
-        for vehicle in self.grid[exit_row]:
-            if vehicle and vehicle._carid == 'X':
+        for vehicle in self.vehicle_list:
+            if vehicle._carid == 'X':
                 # check if the end of the car is at the last column of the board
-                return vehicle._x + vehicle._length == self.size
+                return vehicle._x == self.size - 2
         return False
 

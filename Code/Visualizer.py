@@ -34,7 +34,7 @@ class Visualizer:
                     if vehicle._orientation == 'H':
                         rect = patches.Rectangle((x, y), vehicle._length - 1, 1, edgecolor='black', facecolor=color)
                     else:
-                        rect = patches.Rectangle((x, y), 1, vehicle._length - 1, edgecolor='black', facecolor=color)
+                        rect = patches.Rectangle((x, y), 1, vehicle._length - 2, edgecolor='black', facecolor=color)
                     ax.add_patch(rect)
                     ax.text(x + 0.5, y + 0.5, str(vehicle._carid),
                             horizontalalignment='center', verticalalignment='center',
