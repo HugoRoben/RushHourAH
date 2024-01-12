@@ -9,4 +9,3 @@ class vehicle:
         self._length = length
         self.moves_history = {}
 
-    
