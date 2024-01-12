@@ -1,5 +1,6 @@
 from GridObject import Grid
 import CarObject
+import csv
 from Visualizer import Visualizer
 
 if __name__ == "__main__":
@@ -7,20 +8,23 @@ if __name__ == "__main__":
     grid.load_data('gameboards/Rushhour6x6_1.csv')  # Adjusted to a valid file path
     Visualizer.draw(grid)
 
+    output = [["car", "move"]]
     while True:
-        CarId = input("Which car: ")
-        steps = input("What direction do you want to move: ")
+        print('Car,direction:')
+        move_input = input()
+        CarId = move_input.split(',')[0]
+        steps = int(move_input.split(',')[1])
+        output.append([CarId,steps])
 
         grid.move_vehicle(CarId, int(steps))
         Visualizer.draw(grid)
+    
+        with open('output.csv', 'w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerows(output)
 
+        if grid.is_solved(): 
+            print("You won!")
+            break
 
-# red_car = CarObject.vehicle('H', 2, 2, 2)
-# grid.add_vehicle(red_car)
-# grid.add_vehicle(CarObject.vehicle('V', 0, 0, 2))
-# grid.add_vehicle(CarObject.vehicle('V', 3, 3, 3))
-
-
-
-# # Example move
 

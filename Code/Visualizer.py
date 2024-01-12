@@ -25,15 +25,16 @@ class Visualizer:
             ax.axvline(i, color='black', linewidth=1)
 
         # Draw vehicles
-        for y in range(grid_size):
+        for y in range(grid_size - 1, -1, -1):
             for x in range(grid_size):
-                vehicle = grid.grid[y][x]
+                vehicle = grid.grid[grid_size - 1 - y][x]
                 if vehicle:
                     color = Visualizer.get_vehicle_color(vehicle._carid)
+                    if vehicle._carid == 'X': color = 'red'
                     if vehicle._orientation == 'H':
-                        rect = patches.Rectangle((x, y), vehicle._length, 1, edgecolor='black', facecolor=color)
+                        rect = patches.Rectangle((x, y), vehicle._length - 1, 1, edgecolor='black', facecolor=color)
                     else:
-                        rect = patches.Rectangle((x, y), 1, vehicle._length, edgecolor='black', facecolor=color)
+                        rect = patches.Rectangle((x, y), 1, vehicle._length - 1, edgecolor='black', facecolor=color)
                     ax.add_patch(rect)
                     ax.text(x + 0.5, y + 0.5, str(vehicle._carid),
                             horizontalalignment='center', verticalalignment='center',

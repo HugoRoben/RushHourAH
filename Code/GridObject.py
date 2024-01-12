@@ -77,10 +77,15 @@ class Grid:
             vehicle._y += steps
         self.add_vehicle(vehicle)
 
-    # def is_solved(self):
-    #     # Check if the red car is at the exit
-    #     for vehicle in self.grid[2]:
-    #         if vehicle and vehicle.color == 'red':
-    #             return vehicle.position[0] + vehicle.length == 6
-    #     return False
+    def is_solved(self):
+        # Check if the red car is at the exit
+        # find the row the exit is at based on the size of the board
+        if self.size // 2 == 0: exit_row = self.size / 2
+        else: exit_row = self.size // 2
+        # scan in the exit row for the red car (car with id 'X')
+        for vehicle in self.grid[exit_row]:
+            if vehicle and vehicle._carid == 'X':
+                # check if the end of the car is at the last column of the board
+                return vehicle._x + vehicle._length == self.size
+        return False
 
