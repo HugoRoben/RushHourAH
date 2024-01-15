@@ -22,8 +22,10 @@ class vehicle:
         
         self._carid = CarId
         self._orientation = orientation
-        self._x = col
-        self._y = row
+        self.x = col
+        self.y = row
         self._length = length
         self.moves_history = {}
+
+        self.TotalDelta = 0
 

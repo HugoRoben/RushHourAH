@@ -2,6 +2,7 @@ from GridObject import Grid
 import CarObject
 import csv
 from Visualizer import Visualizer
+from algo import RushHourSolver
 
 
 if __name__ == "__main__":
@@ -23,6 +24,7 @@ if __name__ == "__main__":
     """
     grid = Grid(6)
     grid.load_data('gameboards/Rushhour6x6_3.csv')
+    print(grid.vehicle_dict)
     Visualizer.draw(grid)
 
     output = [["car", "move"]]
@@ -34,6 +36,7 @@ if __name__ == "__main__":
         output.append([CarId,steps])
 
         grid.move_vehicle(CarId, int(steps))
+
         Visualizer.draw(grid)
     
         with open('output.csv', 'w', newline='') as file:

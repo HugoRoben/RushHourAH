@@ -60,7 +60,7 @@ class Grid:
         Postconditions:
             - The vehicle is added to the grid and vehicle list if there's sufficient space.
         """
-        x, y = vehicle._x, vehicle._y
+        x, y = vehicle.x, vehicle.y
         if self.is_space_available(vehicle):
             for i in range(vehicle._length):
                 if vehicle._orientation == 'H':
@@ -68,8 +68,8 @@ class Grid:
                 else:
                     self.grid[y + i][x] = vehicle
             # make a dictionary with key = carid, value = vehicle object
-            # self.vehicle_dict[vehicle._carid] = vehicle
-            self.vehicle_list.append(vehicle)
+            self.vehicle_dict[vehicle._carid] = vehicle
+            # self.vehicle_list.append(vehicle)
 
     def is_space_available(self, vehicle):
             """
@@ -81,7 +81,7 @@ class Grid:
             Returns:
                 bool: True if space is available, False otherwise.
             """
-            x, y = vehicle._x, vehicle._y
+            x, y = vehicle.x, vehicle.y
             for i in range(vehicle._length):
                 if vehicle._orientation == 'H':
                     if not (0 <= x + i < self.size and self.grid[y][x + i] is None):
@@ -106,7 +106,7 @@ class Grid:
             - The vehicle should be within the bounds of the grid.
             - Steps should be an integer.
         """
-        x, y = vehicle._x, vehicle._y
+        x, y = vehicle.x, vehicle.y
         length = vehicle._length
 
         if vehicle._orientation == 'H':
@@ -131,12 +131,18 @@ class Grid:
             - The carid should correspond to a vehicle on the grid.
             - Steps should be an integer.
         """
-        vehicle_to_move = next((v for v in self.vehicle_list if v._carid == carid), None)
-        if vehicle_to_move._orientation == 'V': steps *= -1 
+        vehicle_to_move = self.vehicle_dict[carid]
+
+        if vehicle_to_move._orientation == 'V': steps *= -1
+
         if vehicle_to_move and self.is_path_clear(vehicle_to_move, steps):
             self.clear_vehicle_position(vehicle_to_move)
             self.update_vehicle_position(vehicle_to_move, steps)
-        else: print("move not possible")
+
+            # keep score for the total change in the position of the cars
+            vehicle_to_move.TotalDelta += steps
+
+        # else: print("move not possible")
     
     def clear_vehicle_position(self, vehicle):
         """
@@ -145,7 +151,7 @@ class Grid:
         Args:
             vehicle (vehicle): The vehicle to clear the position of.
         """
-        x, y = vehicle._x, vehicle._y
+        x, y = vehicle.x, vehicle.y
         for i in range(vehicle._length):
             if vehicle._orientation == 'H':
                 self.grid[y][x + i] = None
@@ -164,9 +170,9 @@ class Grid:
             - The new position should be within the grid boundaries.
         """
         if vehicle._orientation == 'H':
-            vehicle._x += steps
+            vehicle.x += steps
         else:
-            vehicle._y += steps
+            vehicle.y += steps
         self.add_vehicle(vehicle)
 
     def is_solved(self):
@@ -178,11 +184,8 @@ class Grid:
             bool: True if the puzzle is solved, False otherwise.
         """
         # find the row the exit is at based on the size of the board
-        if self.size // 2 == 0: exit_row = self.size / 2
-        else: exit_row = self.size // 2
         # scan in the exit row for the red car (car with id 'X')
-        for vehicle in self.vehicle_list:
-            if vehicle._carid == 'X':
+        for vehicle in self.vehicle_dict:
+            if self.vehicle_dict[vehicle]._carid == 'X':
                 # check if the end of the car is at the last column of the board
-                return vehicle._x == self.size - 2
-        return False
+                return self.vehicle_dict[vehicle].x == self.size - 2
