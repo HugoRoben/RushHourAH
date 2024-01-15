@@ -30,7 +30,7 @@ if __name__ == "__main__":
         print('Car,direction:')
         move_input = input()
         CarId = move_input.split(',')[0]
-        steps = -int(move_input.split(',')[1])
+        steps = move_input.split(',')[1]
         output.append([CarId,steps])
 
         grid.move_vehicle(CarId, int(steps))
