@@ -13,7 +13,7 @@ class RushHour(object):
 
 
     def __eq__(self, other):
-        return self.vehicles == other.vehicles
+        return hash(self) == hash(other)
 
 
     def __ne__(self, other):
@@ -88,6 +88,6 @@ class RushHour(object):
     def is_solved(self):
         """Check if the puzzle is solved."""
         for vehicle in self.vehicles:
-            if vehicle.id == 'X':  # Assuming 'X' is the goal vehicle
+            if vehicle.id == 'X':
                 return vehicle.x + vehicle.length == self.dim_board
         return False

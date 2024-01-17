@@ -46,5 +46,4 @@ class Vehicle(object):
             return not self.__eq__(other)
 
         def __repr__(self):
-            return "Vehicle({0}, {1}, {2}, {3}, {4})".format(self.id, self.orientation, self.x, self.y,
-                                                         self.length)
+            return "Vehicle({0}, {1}, {2}, {3})".format(self.id, self.orientation, self.x, self.y)
