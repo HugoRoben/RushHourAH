@@ -38,6 +38,7 @@ class RushHour(object):
 
     def get_board(self):
         """Representation of the Rush Hour board as a 2D list of strings"""
+        
         board = [[' ' for _ in range(self.dim_board)] for _ in range(self.dim_board)]
         
         # board = [[' ', ' ', ' ', ' ', ' ', ' '],
@@ -99,11 +100,6 @@ class RushHour(object):
                     new_vehicles.add(new_v)
                     yield RushHour(new_vehicles, self.dim_board)
 
-    def make_random_move(self):
-        possible_moves = list(self.moves()) 
-        if not possible_moves:
-            return None
-        return random.choice(possible_moves)
 
 
 def load_file(rushhour_file):
@@ -126,88 +122,148 @@ def extract_dimension(filename):
     return int(dim_board)
 
 
-def solve():
-    solutions_dict = {}
-    start_time = time.time()
-    for file in glob.glob('gameboards/*.csv'):
-        game_name = os.path.basename(file).split('.')[0]
-        rushhour_initial = load_file(file)
-        
-        number_of_steps = []
+class RushHourSolver:
+    def __init__(self, rush_hour_game):
+        self.game = rush_hour_game
+        # self.visited_states = set()
+        self.move_count = 0
 
-        for _ in range(2): 
-            rushhour_current = rushhour_initial
-            
-            move_count = 0
-            while not rushhour_current.is_solved():
-                next_state = rushhour_current.make_random_move()
-                if next_state is None:
-                    print("No more moves available.")
-                    break
-                rushhour_current = next_state
-                move_count += 1
-                # print(rushhour_current) 
-            number_of_steps.append(move_count)
-            #print(f"Solved in {move_count} steps with random moves.")
-            
-        solutions_dict[game_name] = number_of_steps
-        print(solutions_dict[game_name])
-        
-    end_time = time.time()
-    total_time = end_time - start_time
-    print(f"Total execution time: {total_time} seconds")
-    return solutions_dict
+    def make_random_move(self):
+        possible_moves = list(self.game.moves())
+        if not possible_moves:
+            return None
+        return random.choice(possible_moves)
+
+    def solve_puzzle(self, max_iterations=1000000):
+        for _ in range(max_iterations):
+            if self.game.is_solved():
+                return self.move_count
+
+            next_state = self.make_random_move()
+            if next_state is None:  # or hash(next_state) in self.visited_states
+                print("No more moves available or state repeated.")
+                break
+
+            # self.visited_states.add(hash(next_state))
+            self.move_count += 1
+            self.game = next_state  # Update the game state
+
+        return 0
 
 
-def plot(solutions_dict):
-    gameboards = []
-    steps = []
-    
-    for gameboard, step_counts in solutions_dict.items():
-        gameboards.extend([gameboard] * len(step_counts))
-        steps.extend(step_counts)
+def calculate_statistics(times, move_counts):
+    avg_time = sum(times) / len(times)
+    avg_moves = sum(move_counts) / len(move_counts)
+    max_time = max(times)
+    min_time = min(times)
+    max_moves = max(move_counts)
+    min_moves = min(move_counts)
 
-    # Create a dataframe
-    data = pd.DataFrame({'Gameboard': gameboards, 'Steps': steps})
+    return {
+        "average_time": avg_time,
+        "average_moves": avg_moves,
+        "max_time": max_time,
+        "min_time": min_time,
+        "max_moves": max_moves,
+        "min_moves": min_moves
+    }
 
-    # Create a boxplot
-    plt.figure(figsize=(12, 8))
 
-    # Boxplot
-    sns.boxplot(data=data, x='Gameboard', y='Steps', palette="Set2")
+def plot_combined_statistics(file_stats):
+    all_times = []
+    all_moves = []
+    labels = []
 
-    # Adding scatterplot
-    sns.stripplot(data=data, x='Gameboard', y='Steps', color='black', alpha=0.5, jitter=True)
+    for file, stats in file_stats.items():
+        all_times.extend(stats["times"])
+        all_moves.extend(stats["moves"])
+        labels.extend([os.path.basename(file)] * len(stats["times"]))
 
-    # Customizing plot
-    plt.xlabel('Gameboard')
-    plt.ylabel('Number of Steps')
-    plt.title('Boxplot and Scatterplot of Steps to Solve Rush Hour Puzzles per Gameboard')
+    data = pd.DataFrame({
+        'Time': all_times,
+        'Moves': all_moves,
+        'File': labels
+    })
+
+    plt.figure(figsize=(12, 6))
+
+    plt.subplot(1, 2, 1)
+    sns.boxplot(x='File', y='Time', data=data)
     plt.xticks(rotation=45)
-    plt.grid(True)
-    plt.tight_layout()
+    plt.title("Time Taken for Each File")
+    plt.ylabel("Time (seconds)")
 
+    plt.subplot(1, 2, 2)
+    sns.boxplot(x='File', y='Moves', data=data)
+    plt.xticks(rotation=45)
+    plt.title("Move Counts for Each File")
+    plt.ylabel("Number of Moves")
+
+    plt.tight_layout()
     plt.show()
 
 
-    stats_data = []
-    for gameboard, steps in solutions_dict.items():
-        gameboard_data = pd.Series(steps)
-        stats = {
-            'Gameboard': gameboard,
-            'Mean': gameboard_data.mean(),
-            'Median': gameboard_data.median(),
-            'Min': gameboard_data.min(),
-            'Max': gameboard_data.max(),
-            'Std': gameboard_data.std()
-        }
-        stats_data.append(stats)
+def main():
+    file = 'gameboards/Rushhour9x9_6.csv'
+    start_time = time.perf_counter()
 
-    descriptive_stats_df = pd.DataFrame(stats_data)
+    rush_game = load_file(file)
+    solver = RushHourSolver(rush_game)
+    move_count = solver.solve_puzzle()
 
-    print(descriptive_stats_df)
-    # descriptive_stats_df.to_csv('gameboard_statistics.csv', index=False)
+    end_time = time.perf_counter()
+    total_time = end_time - start_time
+
+    times = [total_time]
+    move_counts = [move_count]
+
+    stats = calculate_statistics(times, move_counts)
+    stats["file"] = os.path.basename(file)
+
+    stats_df = pd.DataFrame([stats])
+    print(stats_df)
+
 
 if __name__ == '__main__':
-    solution = solve()
-    plot(solution)
+    main()
+
+
+# def main():
+#     num_runs = 3
+#     solutions_dict = {}
+#     all_stats = []
+
+#     for file in glob.glob('gameboards/*.csv'):
+#         times = []
+#         move_counts = []
+
+#         for _ in range(num_runs):
+#             start_time = time.perf_counter()
+
+#             rush_game = load_file(file)
+#             solver = RushHourSolver(rush_game)
+#             move_count = solver.solve_puzzle()
+
+#             end_time = time.perf_counter()
+#             total_time = end_time - start_time
+
+#             times.append(total_time)
+#             move_counts.append(move_count)
+
+#         stats = calculate_statistics(times, move_counts)
+#         stats_for_plot = stats.copy()
+#         stats_for_plot["times"] = times
+#         stats_for_plot["moves"] = move_counts
+#         solutions_dict[file] = stats_for_plot
+
+#         stats["file"] = os.path.basename(file)
+#         all_stats.append(stats)
+
+#     stats_df = pd.DataFrame(all_stats)
+#     print(stats_df)
+
+#     plot_combined_statistics(solutions_dict)
+
+
+# if __name__ == '__main__':
+#     main()
