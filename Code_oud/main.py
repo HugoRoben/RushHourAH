@@ -1,8 +1,8 @@
 from GridObject import Grid
 import CarObject
 import csv
-from Visualizer import Visualizer
-from algo import RushHourSolver
+from Code_oud.Visualizer import Visualizer
+from Code_oud.algo import RushHourSolver
 
 
 if __name__ == "__main__":
@@ -24,6 +24,7 @@ if __name__ == "__main__":
     """
     grid = Grid(6)
     grid.load_data('gameboards/Rushhour6x6_3.csv')
+
     print(grid.vehicle_dict)
     Visualizer.draw(grid)
 
