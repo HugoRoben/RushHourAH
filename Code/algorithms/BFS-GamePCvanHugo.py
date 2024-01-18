@@ -29,20 +29,27 @@ def breadth_first_search(RushGame, max_depth=100):
             break
 
         if current_board not in visited_states:
+
             visited_states.add(current_board)
 
+            ## using the Astar algorithm to use only the states with the lowest cost
+            calculate_cost(current_board, 9)
+            sort_states_by_cost(visit_queue, 9)
+            ##
+
             states_per_depth[depth] = states_per_depth.get(depth, 0) + 1
+
             if current_board.is_solved():
                 solutions.append(current_path)
+                return {
+                    'visited': len(visited_states),
+                    'solutions': solutions,
+                    'depth_states': states_per_depth
+                }
             else:
                 for move in current_board.moves():
                     visit_queue.appendleft((move, current_path))
-
-    return {
-        'visited': len(visited_states),
-        'solutions': solutions,
-        'depth_states': states_per_depth
-    }
+    return None
 
 
 def solution_steps(solution_path):

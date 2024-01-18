@@ -3,17 +3,23 @@ from Code.classes.VehicleClass import Vehicle
 class RushHour(object):
     """A configuration of a single Rush Hour board."""
 
-    def __init__(self, vehicles, dimension):
+    def __init__(self, vehicles, dimension, move_count = 0):
         self.vehicles = vehicles
         self.dim_board = dimension
+        self.move_count = move_count
 
 
     def __hash__(self):
         return hash(self.__repr__())
 
 
+    # def __eq__(self, other):
+    #     return hash(self) == hash(other)
+
     def __eq__(self, other):
-        return hash(self) == hash(other)
+        if not isinstance(other, RushHour):
+            return False
+        return all(v1 == v2 for v1, v2 in zip(self.vehicles, other.vehicles))
 
 
     def __ne__(self, other):
@@ -64,26 +70,34 @@ class RushHour(object):
                     new_vehicles = self.vehicles.copy()
                     new_vehicles.remove(v)
                     new_vehicles.add(new_v)
-                    yield RushHour(new_vehicles, self.dim_board)
+                    # yield RushHour(new_vehicles, self.dim_board)
+                    yield RushHour(new_vehicles, self.dim_board, self.move_count + 1)
+
                 if v.x + v.length < self.dim_board and board[v.y][v.x + v.length] == ' ':
                     new_v = Vehicle(v.id, v.orientation, v.x + 1, v.y, v.length)
                     new_vehicles = self.vehicles.copy()
                     new_vehicles.remove(v)
                     new_vehicles.add(new_v)
-                    yield RushHour(new_vehicles, self.dim_board)
+                    # yield RushHour(new_vehicles, self.dim_board)
+                    yield RushHour(new_vehicles, self.dim_board, self.move_count + 1)
+
             else:
                 if v.y - 1 >= 0 and board[v.y - 1][v.x] == ' ':
                     new_v = Vehicle(v.id, v.orientation, v.x, v.y - 1, v.length)
                     new_vehicles = self.vehicles.copy()
                     new_vehicles.remove(v)
                     new_vehicles.add(new_v)
-                    yield RushHour(new_vehicles, self.dim_board)
+                    # yield RushHour(new_vehicles, self.dim_board)
+                    yield RushHour(new_vehicles, self.dim_board, self.move_count + 1)
+
                 if v.y + v.length < self.dim_board and board[v.y + v.length][v.x] == ' ':
                     new_v = Vehicle(v.id, v.orientation, v.x, v.y + 1, v.length)
                     new_vehicles = self.vehicles.copy()
                     new_vehicles.remove(v)
                     new_vehicles.add(new_v)
-                    yield RushHour(new_vehicles, self.dim_board)
+                    # yield RushHour(new_vehicles, self.dim_board)
+                    yield RushHour(new_vehicles, self.dim_board, self.move_count + 1)
+
                     
     def is_solved(self):
         """Check if the puzzle is solved."""
