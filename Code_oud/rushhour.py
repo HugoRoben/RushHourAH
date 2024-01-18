@@ -61,13 +61,6 @@ class RushHour(object):
 
         return board
 
-    def is_solved(self):
-        """Check if the puzzle is solved."""
-        for vehicle in self.vehicles:
-            if vehicle.id == 'X':  # Assuming 'X' is the goal vehicle
-                return vehicle.x + vehicle.length == self.dim_board
-        return False
-
 
     def moves(self):
         """Return iterator of next possible moves."""
@@ -99,6 +92,13 @@ class RushHour(object):
                     new_vehicles.remove(v)
                     new_vehicles.add(new_v)
                     yield RushHour(new_vehicles, self.dim_board)
+                    
+    def is_solved(self):
+        """Check if the puzzle is solved."""
+        for vehicle in self.vehicles:
+            if vehicle.id == 'X':  # Assuming 'X' is the goal vehicle
+                return vehicle.x + vehicle.length == self.dim_board
+        return False
 
 
 
