@@ -22,8 +22,8 @@ def load_file(rushhour_file, dimension):
 def main():
     start_time = time.perf_counter()
 
-    file = 'data/Rushhour6x6_3.csv'
-    dimension = 6
+    file = 'data/Rushhour9x9_4.csv'
+    dimension = 9
 
     rush_game = load_file(file, dimension)
     results = breadth_first_search(rush_game, max_depth=100)
