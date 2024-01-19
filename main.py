@@ -1,6 +1,7 @@
 import time
 import csv
 import matplotlib.pyplot as plt
+from Code.algorithms.IDDFS import *
 from Code.classes.VehicleClass import Vehicle
 from Code.classes.RushClass import RushHour
 from Code.algorithms.Random import *
@@ -23,10 +24,8 @@ def load_file(rushhour_file, dimension):
 def main():
     start_time = time.perf_counter()
 
-    file = 'data/Rushhour9x9_4.csv'
-    dimension = 9
-    # file = 'data/Rushhour6x6_2.csv'
-    # dimension = 6
+    file = 'data/Rushhour6x6_3.csv'
+    dimension = 6
 
     start_state = load_file(file, dimension)
     # goal_state = solve_puzzle(start_state)[0]
