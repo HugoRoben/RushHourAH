@@ -13,13 +13,13 @@ class RushHour(object):
         return hash(self.__repr__())
 
 
-    # def __eq__(self, other):
-    #     return hash(self) == hash(other)
-
     def __eq__(self, other):
-        if not isinstance(other, RushHour):
-            return False
-        return all(v1 == v2 for v1, v2 in zip(self.vehicles, other.vehicles))
+        return hash(self) == hash(other)
+
+    # def __eq__(self, other):
+    #     if not isinstance(other, RushHour):
+    #         return False
+    #     return all(v1 == v2 for v1, v2 in zip(self.vehicles, other.vehicles))
 
 
     def __ne__(self, other):

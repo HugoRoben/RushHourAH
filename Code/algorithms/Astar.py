@@ -1,3 +1,9 @@
+from ..classes.VehicleClass import Vehicle
+from ..classes.RushClass import *
+import heapq
+from matplotlib import pyplot 
+
+
 class HeapItem:
     def __init__(self, priority, rush_hour_obj):
         self.priority = priority
@@ -5,119 +11,162 @@ class HeapItem:
 
     def __lt__(self, other):
         return self.priority < other.priority
+
+class Astar:
+
+    def __init__(self, begin_state) -> None:
+        self.begin_state = begin_state
+        self.vehicles = begin_state.vehicles
+
+    def get_red_car(self, state):
+        for vehicle in state.vehicles:
+            if vehicle.id == 'X':
+                red_car = vehicle
+                return red_car
+        # return None if red car not found
+        return None
     
-from ..classes.VehicleClass import Vehicle
-from ..classes.RushClass import *
-import heapq
+    def is_blocking(self, v, blocker):
 
-# def heuristic(state):
-#     for vehicle in state.vehicles:
-#         if vehicle.id == 'X':  # Assuming 'X' is the red car
-#             return state.dim_board - (vehicle.x + vehicle.length)
-#     return float('inf')
+        if v.orientation == 'H' and blocker.orientation == 'H' and v.y != blocker.y:
+            return False
+        if v.orientation == 'V' and blocker.orientation == 'V' and v.x != blocker.x:
+            return False
 
-def heuristic(state1, state2):
-    """
-    Calculate the number of differing vehicles between two states.
+        # Horizontal vehicle blocking scenarios
+        if blocker.orientation == 'H':
+            return self.is_horizontally_blocking(blocker, v)
+
+        # Vertical vehicle blocking scenarios
+        if blocker.orientation == 'V':
+            return self.is_vertically_blocking(blocker, v)
+
+    def is_horizontally_blocking(self, blocker, target):
+        """
+        Check if a horizontally oriented 'vehicle' is blocking 'target'.
+        """
+        blocker_end = blocker.x + blocker.length
+        if target.orientation == 'H':
+            return blocker_end == target.x or target.x + target.length == blocker.x
+        if target.orientation == 'V':
+            if blocker.y == target.y + target.length or blocker.y == target.y - 1:
+                return any(target.x == pos for pos in range(blocker.x, blocker_end))
+
+    def is_vertically_blocking(self, blocker, target):
+        """
+        Check if a vertically oriented 'vehicle' is blocking 'target'.
+        """
+        blocker_end = blocker.y + blocker.length
+        if target.orientation == 'V':
+            return blocker.y == target.y + target.length or blocker_end == target.y 
+        if target.orientation == 'H':
+            return blocker.x == target.x + target.length or blocker.x == target.x - 1
+
+    def get_blocking_cars(self, state):
+        red_car = self.get_red_car(state)
+        blocking_cars = []
+        for v in self.vehicles:
+            if v.x > red_car.x + 1 and v.orientation == 'V':
+                if v.y == red_car.y - 1 or v.y == red_car.y or (v.y == red_car.y - 2 and v.length == 3):
+                    blocking_cars.append(v)
+        return blocking_cars
+
+    def second_blockers(self, state):
+        """get the cars blocking the cars that are blocking the red car"""
+        blockers = self.get_blocking_cars(state)
+        second_blockers = []
+        for blocker in blockers:
+            for v in state.vehicles:
+                    if self.is_blocking(blocker, v):
+                        second_blockers.append(v)
+        return second_blockers
+   
+    def third_blockers(self, state, second_blockers, blockers):
+        """get the car that are blocking the cars from second_blockers"""
+        third_blockers = []
+        for blocker in second_blockers:
+            for v in state.vehicles:
+                if v not in second_blockers and v not in blockers:
+                        if self.is_blocking(blocker, v):
+                            third_blockers.append(v)
+        return third_blockers
     
-    Args:
-    state1, state2 (RushHour): Two instances of the RushHour game state.
+    def fourth_blockers(self, state, third_blockers, second_blockers, blockers):
+        """get the car that are blocking the cars from third_blockers"""
+        fourth_blockers = []
+        for blocker in third_blockers:
+            for v in state.vehicles:
+                if v not in third_blockers and v not in second_blockers and v not in blockers:
+                        if self.is_blocking(blocker, v):
+                            fourth_blockers.append(v)
+        return fourth_blockers
 
-    Returns:
-    int: The number of vehicles that differ between the two states.
-    """
-    # Ensure both states have the same number of vehicles
-    if len(state1.vehicles) != len(state2.vehicles):
-        raise ValueError("States do not have the same number of vehicles.")
+    def three_long_blockers(self, state):
+        blockers = self.get_blocking_cars(state)
+        count = 0
+        for v in blockers: 
+            if v.length == 3: count +=1
+        return count 
 
-    # Count the number of vehicles that are different
-    differing_vehicles = sum(1 for v1, v2 in zip(state1.vehicles, state2.vehicles) if v1 != v2)
-    return differing_vehicles
+    def total_heuristic_function(self, state, prev_state):
+        blockers = self.get_blocking_cars(state)
+        second_blockers = self.second_blockers(state)
+        third_blockers = self.third_blockers(state, second_blockers, blockers)
+        fourth_blockers = self.fourth_blockers(state, third_blockers, second_blockers, blockers)
 
-def is_winning_state(state):
-    """
-    Check if the 'X' vehicle (red car) can exit the board.
-    """
-    for vehicle in state.vehicles:
-        if vehicle.id == 'X':
-            # Check if the red car's path to the exit is clear
-            for x in range(vehicle.x + 1, state.dim_board):
-                if any(v.x == x and v.y == vehicle.y -1 or v.y == vehicle.y - 2 for v in state.vehicles if v.id != 'X'):
-                    # Found another car blocking the path
-                    return False
-            return True
-    return False
+        blocking_cost = len(blockers) + len(second_blockers) + len(third_blockers) + len(fourth_blockers)
+        extra_cost_long_cars = self.three_long_blockers(state)
+        distance_cost = self.heuristic_distance_to_exit(state)
 
-def astar_search(initial_state, goal_state, max_iterations=10000):
-    open_start = [HeapItem(heuristic(initial_state, goal_state), initial_state)]
-    open_goal = [HeapItem(heuristic(goal_state, initial_state), goal_state)]
+        distance_weight = 1
+        if extra_cost_long_cars == 0:
+            distance_weight = 2
 
-    closed_start, closed_goal = set(), set()
-    backtrack_start, backtrack_goal = {}, {}
+        return blocking_cost + distance_cost * distance_weight + extra_cost_long_cars
+        
+    def heuristic_distance_to_exit(self, state):
+        red_car = self.get_red_car(state)
+        return (state.dim_board - 2 - red_car.x)
 
-    iterations = 0
+    def is_winning_state(self, state):
+        """
+        Check if the 'X' vehicle (red car) can exit the board.
+        """
+        return len(self.get_blocking_cars(state)) == 0
+    
+    def astar_search_single_ended(self, initial_state, max_iterations=100000000):
+        # store the heuristic value of all the used states in a list to plot
+        heuristic_list = []
+        # calculate heuristic function of the starting state
+        open_states = [HeapItem(self.total_heuristic_function(initial_state, initial_state), initial_state)]
+        closed_states = set()
+        open_set = {initial_state}
+        iterations = 0
 
-    while open_start and open_goal:
-        if iterations >= max_iterations:
-            print("Maximum iterations reached, terminating search.")
-            break
+        while open_states:
+            if iterations >= max_iterations:
+                print("Maximum iterations reached, terminating search.")
+                break
 
-        current_start = heapq.heappop(open_start).rush_hour_obj
-        current_goal = heapq.heappop(open_goal).rush_hour_obj
+            current_state = heapq.heappop(open_states).rush_hour_obj
 
-        print(f"Current Goal State: {current_start}")
+            if self.is_winning_state(current_state):
+                pyplot.plot(heuristic_list)
+                pyplot.show()
+                return iterations
 
-        if is_winning_state(current_start):
-            print("Winning state found")
-            return reconstruct_path(backtrack_start, {}, current_start, None)
+            # print(f"Current State: {current_state}")
+            closed_states.add(current_state)
 
+            for next_state in current_state.moves():
+                if next_state not in closed_states and next_state not in open_set:
+                    heapq.heappush(open_states, HeapItem(self.total_heuristic_function(next_state, current_state), next_state))
+                    open_set.add(next_state)
+                    heuristic_list.append(self.total_heuristic_function(next_state, current_state))
+            # print(iterations)
+            iterations += 1
 
-        if current_start == current_goal or current_start in closed_goal or current_goal in closed_start:
-            print("Meeting point found")
-            return reconstruct_path(backtrack_start, backtrack_goal, current_start, current_goal)
-
-        closed_start.add(current_start)
-        closed_goal.add(current_goal)
-
-        for next_state in current_start.moves():
-            if next_state not in closed_start:
-                heapq.heappush(open_start, HeapItem(heuristic(next_state, current_goal) + next_state.move_count, next_state))
-                backtrack_start[next_state] = current_start
-
-        for next_state in current_goal.moves():
-            if next_state not in closed_goal:
-                heapq.heappush(open_goal, HeapItem(heuristic(next_state, current_start) + next_state.move_count, next_state))
-                backtrack_goal[next_state] = current_goal
-
-        iterations += 1
-        # print(f"Open Start Size: {len(open_start)}, Open Goal Size: {len(open_goal)}, Iteration: {iterations}")
-
-    print("No solution found")
-    return None
-
-def reconstruct_path(backtrack_start, backtrack_goal, meeting_start, meeting_goal):
-    # Reconstruct path from start to meeting point
-    path_start = []
-    while meeting_start in backtrack_start:
-        path_start.append(meeting_start)
-        meeting_start = backtrack_start[meeting_start]
-
-    # Reconstruct path from goal to meeting point
-    path_goal = []
-    while meeting_goal in backtrack_goal:
-        path_goal.append(meeting_goal)
-        meeting_goal = backtrack_goal[meeting_goal]
-
-    return path_start[::-1] + path_goal
-
-
-
-
-# F,H,1,4,2
-# G,V,3,3,2
-# H,H,4,4,2
-# I,V,6,3,2
-# J,H,5,5,2
-# K,V,1,5,2
-# L,V,3,5,2
-# E,V,4,2,2
+        print("No solution found")
+        pyplot.plot(heuristic_list)
+        pyplot.show()
+        return None

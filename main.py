@@ -23,16 +23,19 @@ def load_file(rushhour_file, dimension):
 def main():
     start_time = time.perf_counter()
 
-    # file = 'data/Rushhour9x9_4.csv'
-    # dimension = 9
-    file = 'data/Rushhour6x6_1.csv'
-    dimension = 6
+    file = 'data/Rushhour9x9_4.csv'
+    dimension = 9
+    # file = 'data/Rushhour6x6_2.csv'
+    # dimension = 6
 
     start_state = load_file(file, dimension)
-    goal_state = solve_puzzle(start_state)[0]
-    results = astar_search(start_state, goal_state)
+    # goal_state = solve_puzzle(start_state)[0]
+
+    results = Astar(start_state).astar_search_single_ended(start_state)
     if results is not None:
-         print("something")
+        print(f'bord: {file}:')
+        print(results)
+
     # rush_game = load_file(file, dimension)
     # results = breadth_first_search(rush_game, max_depth=100)
 
