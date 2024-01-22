@@ -1,4 +1,4 @@
-def iterative_deepening_search(RushGame, max_depth=100):
+def iterative_deepening_search(RushGame, max_depth=500):
     """
     Perform an iterative deepening depth-first search on a RushHour board to find solutions.
 
@@ -46,6 +46,7 @@ def depth_limited_search(state, limit, visited, path=()):
                 if new_path is not None:
                     return new_path
     return None
+
 
 def solution_steps(solution_path):
     steps = []
