@@ -8,6 +8,7 @@ from Code.classes.RushClass import RushHour
 from Code.algorithms.Random import *
 from Code.algorithms.BFS import *
 from Code.algorithms.Astar import * 
+from Code.algorithms.IDAstar import * 
 
 
 def load_file(rushhour_file, dimension):
@@ -40,6 +41,15 @@ def main():
         if results is not None:
             print(f'Board: {file}:')
             print(results)
+    
+    elif args.algorithm.lower() == 'idastar':
+        ida_star_solver = IDAstar(rush_game)
+        results = ida_star_solver.idastar_search(rush_game)
+        if results is not None:
+            print(f'Board: {file}:')
+            print(f'Solved in {results} iterations')
+        else:
+            print("No solution found")
 
     elif args.algorithm.lower() == 'iddfs':
         results = iterative_deepening_search(rush_game, max_depth=500)
