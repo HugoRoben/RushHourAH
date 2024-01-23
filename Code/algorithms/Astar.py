@@ -13,7 +13,6 @@ class HeapItem:
         return self.priority < other.priority
 
 class Astar:
-
     def __init__(self, begin_state) -> None:
         self.begin_state = begin_state
         self.vehicles = begin_state.vehicles
@@ -70,36 +69,25 @@ class Astar:
                 if v.y == red_car.y - 1 or v.y == red_car.y or (v.y == red_car.y - 2 and v.length == 3):
                     blocking_cars.append(v)
         return blocking_cars
-
-    def second_blockers(self, state):
-        """get the cars blocking the cars that are blocking the red car"""
-        blockers = self.get_blocking_cars(state)
-        second_blockers = []
-        for blocker in blockers:
-            for v in state.vehicles:
-                    if self.is_blocking(blocker, v):
-                        second_blockers.append(v)
-        return second_blockers
-   
-    def third_blockers(self, state, second_blockers, blockers):
-        """get the car that are blocking the cars from second_blockers"""
-        third_blockers = []
-        for blocker in second_blockers:
-            for v in state.vehicles:
-                if v not in second_blockers and v not in blockers:
-                        if self.is_blocking(blocker, v):
-                            third_blockers.append(v)
-        return third_blockers
     
-    def fourth_blockers(self, state, third_blockers, second_blockers, blockers):
-        """get the car that are blocking the cars from third_blockers"""
-        fourth_blockers = []
-        for blocker in third_blockers:
-            for v in state.vehicles:
-                if v not in third_blockers and v not in second_blockers and v not in blockers:
-                        if self.is_blocking(blocker, v):
-                            fourth_blockers.append(v)
-        return fourth_blockers
+    def blocking_cars_iterative(self, state, max_depth):
+        already_considered = set()
+        current_level_blockers = set(self.get_blocking_cars(state))
+        all_blockers = set(current_level_blockers)
+        already_considered.update(current_level_blockers)
+
+        for depth in range(2, max_depth + 1):
+            next_level_blockers = set()
+            for blocker in current_level_blockers:
+                for v in state.vehicles:
+                    if self.is_blocking(blocker, v) and v not in already_considered:
+                        next_level_blockers.add(v)
+                        already_considered.add(v)
+
+            current_level_blockers = next_level_blockers
+            all_blockers.update(current_level_blockers)
+
+        return all_blockers
 
     def three_long_blockers(self, state):
         blockers = self.get_blocking_cars(state)
@@ -108,25 +96,25 @@ class Astar:
             if v.length == 3: count +=1
         return count 
 
-    def total_heuristic_function(self, state, prev_state):
-        blockers = self.get_blocking_cars(state)
-        second_blockers = self.second_blockers(state)
-        third_blockers = self.third_blockers(state, second_blockers, blockers)
-        fourth_blockers = self.fourth_blockers(state, third_blockers, second_blockers, blockers)
-
-        blocking_cost = len(blockers) + len(second_blockers) + len(third_blockers) + len(fourth_blockers)
-        extra_cost_long_cars = self.three_long_blockers(state)
-        distance_cost = self.heuristic_distance_to_exit(state)
-
-        distance_weight = 1
-        if extra_cost_long_cars == 0:
-            distance_weight = 2
-
-        return blocking_cost + distance_cost * distance_weight + extra_cost_long_cars
-        
     def heuristic_distance_to_exit(self, state):
         red_car = self.get_red_car(state)
         return (state.dim_board - 2 - red_car.x)
+    
+    def total_heuristic_function(self, state):
+        length_weight = 1
+        distance_weight = 1
+
+        blocking_cost = len(self.blocking_cars_iterative(state, 3))
+        extra_cost_long_cars = self.three_long_blockers(state)
+        distance_cost = self.heuristic_distance_to_exit(state)
+
+        if extra_cost_long_cars >= 2:
+            distance_weight = 0.5
+            length_weight = 2        
+        if extra_cost_long_cars == 0:
+            distance_weight = 2
+
+        return blocking_cost + distance_cost * distance_weight + extra_cost_long_cars * length_weight
 
     def is_winning_state(self, state):
         """
@@ -134,11 +122,23 @@ class Astar:
         """
         return len(self.get_blocking_cars(state)) == 0
     
+    def reconstruct_path(self, end_state):
+        """
+        Reconstruct the solution path from the end state.
+        """
+        path = []
+        current_state = end_state
+        while current_state is not None:
+            path.insert(0, current_state)
+            current_state = current_state.parent
+        return path
+
     def astar_search_single_ended(self, initial_state, max_iterations=100000000):
         # store the heuristic value of all the used states in a list to plot
         heuristic_list = []
+        solution_path = []
         # calculate heuristic function of the starting state
-        open_states = [HeapItem(self.total_heuristic_function(initial_state, initial_state), initial_state)]
+        open_states = [HeapItem(self.total_heuristic_function(initial_state), initial_state)]
         closed_states = set()
         open_set = {initial_state}
         iterations = 0
@@ -149,24 +149,24 @@ class Astar:
                 break
 
             current_state = heapq.heappop(open_states).rush_hour_obj
-
+            solution_path.append(current_state)
             if self.is_winning_state(current_state):
-                pyplot.plot(heuristic_list)
-                pyplot.show()
-                return iterations
+                solution_path = self.reconstruct_path(current_state)
+                print("Solution found in {} moves".format(len(solution_path) - 1))
+                # Optionally, print or process the solution path
+                # for state in solution_path:
+                #     print(state)
+                return solution_path
 
-            # print(f"Current State: {current_state}")
             closed_states.add(current_state)
 
             for next_state in current_state.moves():
                 if next_state not in closed_states and next_state not in open_set:
-                    heapq.heappush(open_states, HeapItem(self.total_heuristic_function(next_state, current_state), next_state))
+                    heapq.heappush(open_states, HeapItem(self.total_heuristic_function(next_state), next_state))
                     open_set.add(next_state)
-                    heuristic_list.append(self.total_heuristic_function(next_state, current_state))
-            # print(iterations)
+                    heuristic_list.append(self.total_heuristic_function(next_state))
+
             iterations += 1
 
         print("No solution found")
-        pyplot.plot(heuristic_list)
-        pyplot.show()
         return None

@@ -6,6 +6,7 @@ from Code.classes.RushClass import RushHour
 from Code.algorithms.Random import *
 from Code.algorithms.BFS import *
 from Code.algorithms.Astar import * 
+from Code.algorithms.Random import * 
 
 
 def load_file(rushhour_file, dimension):
@@ -25,16 +26,19 @@ def main():
 
     file = 'data/Rushhour9x9_4.csv'
     dimension = 9
-    # file = 'data/Rushhour6x6_2.csv'
-    # dimension = 6
-
     start_state = load_file(file, dimension)
-    # goal_state = solve_puzzle(start_state)[0]
+    print(start_state)
+
+    # solve_puzzle(start_state)
+    # # file = 'data/Rushhour6x6_3.csv'
+    # # dimension = 6
+
+    # # goal_state = solve_puzzle(start_state)[0]
 
     results = Astar(start_state).astar_search_single_ended(start_state)
-    if results is not None:
-        print(f'bord: {file}:')
-        print(results)
+    # if results is not None:
+    #     print(f'bord: {file}:')
+    #     print(results)
 
     # rush_game = load_file(file, dimension)
     # results = breadth_first_search(rush_game, max_depth=100)
@@ -51,9 +55,9 @@ def main():
     # else:
     #     print("No solution found")
 
-    end_time = time.perf_counter()
-    time_taken = end_time - start_time
-    print(f'Time taken: {time_taken:.2f} seconds')
+    # end_time = time.perf_counter()
+    # time_taken = end_time - start_time
+    # print(f'Time taken: {time_taken:.2f} seconds')
 
 
 if __name__ == "__main__":

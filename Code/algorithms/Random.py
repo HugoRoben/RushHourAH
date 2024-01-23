@@ -1,6 +1,5 @@
 import random
-from Code.classes.RushClass import RushHour
-# import time
+from ..classes.RushClass import *# import time
 # import matplotlib.pyplot as plt
 # import seaborn as sns
 # import pandas as pd
@@ -11,6 +10,8 @@ def solve_puzzle(Rush_game, max_iterations=1000000):
     move_count = 0
     for _ in range(max_iterations):
         if game.is_solved():
+            print(move_count)
+            print(game)
             return game, move_count
 
         possible_moves = list(game.moves())
