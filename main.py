@@ -22,11 +22,12 @@ def load_file(rushhour_file, dimension):
 def main():
     start_time = time.perf_counter()
 
-    file = 'data/Rushhour6x6_3.csv'
-    dimension = 6
+    file = 'data/Rushhour9x9_6.csv'
+    dimension = 9
 
     rush_game = load_file(file, dimension)
-    results = breadth_first_search(rush_game, max_depth=100)
+    # print(rush_game)
+    results = breadth_first_search(rush_game)
 
     if results['solutions']:
         solution = results['solutions'][0]
@@ -63,29 +64,3 @@ if __name__ == "__main__":
     
     # plt.hist(solve_count, bins=20, label=file)
     # plt.show()
-
-
-
-# def main():
-#     start_time = time.perf_counter()
-
-#     file = 'data/Rushhour6x6_2.csv'
-#     dimension = 6
-
-#     rush_game = load_file(file, dimension)
-#     results = breadth_first_search(rush_game, max_depth=100)
-
-#     if results['solutions']:
-#         for i, solution in enumerate(results['solutions'], start=1):
-#             steps = solution_steps(solution)
-#             print(f'Solution {i}: {", ".join(steps)}')
-#             print(f'Number of steps: {len(steps)}\n')
-#     else:
-#         print("No solution found")
-
-#     end_time = time.perf_counter()
-#     time_taken = end_time - start_time
-#     print(f'Time taken: {time_taken:.2f} seconds')
-
-# if __name__ == "__main__":
-#     main()
