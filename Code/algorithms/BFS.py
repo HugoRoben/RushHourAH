@@ -34,15 +34,20 @@ def breadth_first_search(RushGame, max_depth=100):
             states_per_depth[depth] = states_per_depth.get(depth, 0) + 1
             if current_board.is_solved():
                 solutions.append(current_path)
+                return {
+                    'visited': len(visited_states),
+                    'solutions': solutions,
+                    'depth_states': states_per_depth
+                }
             else:
                 for move in current_board.moves():
                     visit_queue.appendleft((move, current_path))
-
-    return {
-        'visited': len(visited_states),
-        'solutions': solutions,
-        'depth_states': states_per_depth
-    }
+    # print(f'{len(visited_states)} | {states_per_depth}')
+    # return {
+    #     'visited': len(visited_states),
+    #     'solutions': solutions,
+    #     'depth_states': states_per_depth
+    # }
 
 
 def solution_steps(solution_path):

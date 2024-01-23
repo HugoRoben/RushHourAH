@@ -1,12 +1,14 @@
 import time
 import csv
+import argparse
 import matplotlib.pyplot as plt
+from Code.algorithms.IDDFS import *
 from Code.classes.VehicleClass import Vehicle
 from Code.classes.RushClass import RushHour
 from Code.algorithms.Random import *
 from Code.algorithms.BFS import *
 from Code.algorithms.Astar import * 
-from Code.algorithms.Random import * 
+from Code.algorithms.IDAstar import * 
 
 
 def load_file(rushhour_file, dimension):
@@ -24,41 +26,61 @@ def load_file(rushhour_file, dimension):
 def main():
     start_time = time.perf_counter()
 
-    file = 'data/Rushhour9x9_4.csv'
-    dimension = 9
-    start_state = load_file(file, dimension)
-    print(start_state)
+    parser = argparse.ArgumentParser(description="Run Rush Hour solver algorithms.")
+    parser.add_argument("algorithm", help="Algorithm to use (Astar, IDDFS, BFS)", type=str)
+    parser.add_argument("dimension", help="Dimension of the board (6, 9, or 12)", type=int)
+    parser.add_argument("board_number", help="Board number (1 to 7)", type=int)
+    args = parser.parse_args()
 
-    # solve_puzzle(start_state)
-    # # file = 'data/Rushhour6x6_3.csv'
-    # # dimension = 6
+    file = f'data/Rushhour{args.dimension}x{args.dimension}_{args.board_number}.csv'
+    dimension = args.dimension
+    rush_game = load_file(file, dimension)
+    
+    if args.algorithm.lower() == 'astar':
+        results = Astar(rush_game).astar_search_single_ended(rush_game)
+        if results is not None:
+            print(f'Board: {file}:')
+            print(results)
+    
+    elif args.algorithm.lower() == 'idastar':
+        ida_star_solver = IDAstar(rush_game)
+        results = ida_star_solver.idastar_search(rush_game)
+        if results is not None:
+            print(f'Board: {file}:')
+            print(f'Solved in {results} iterations')
+        else:
+            print("No solution found")
 
-    # # goal_state = solve_puzzle(start_state)[0]
+    elif args.algorithm.lower() == 'iddfs':
+        results = iterative_deepening_search(rush_game, max_depth=500)
+        if results['solutions']:
+            solution = results['solutions'][0]
+            steps = solution_steps(solution)
+            number_steps = len(solution)
+            print(f'Board: {file}:')
+            steps_output = ', '.join(f'{step}' for step in steps)
+            print(f'Solved in {number_steps} steps: {steps_output}')
+        else:
+            print("No solution found")
 
-    results = Astar(start_state).astar_search_single_ended(start_state)
-    # if results is not None:
-    #     print(f'bord: {file}:')
-    #     print(results)
+    elif args.algorithm.lower() == 'bfs':
+        results = breadth_first_search(rush_game, max_depth=500)
+        if results['solutions']:
+            solution = results['solutions'][0]
+            steps = solution_steps(solution)
+            number_steps = len(solution)
+            print(f'Board: {file}:')
+            steps_output = ', '.join(f'{step}' for step in steps)
+            print(f'Solved in {number_steps} steps: {steps_output}')
+        else:
+            print("No solution found")
 
-    # rush_game = load_file(file, dimension)
-    # results = breadth_first_search(rush_game, max_depth=100)
+    else:
+        print("Invalid algorithm. Please choose from Astar, IDDFS, or BFS.")
 
-    # if results['solutions']:
-    #     solution = results['solutions'][0]
-    #     steps = solution_steps(solution)
-    #     number_steps = len(solution)
-
-    #     print(f'bord: {file}:')
-    #     steps_output = ', '.join(f'{step}' for step in steps)
-    #     print(f'Solved in {number_steps} steps: {steps_output}')
-
-    # else:
-    #     print("No solution found")
-
-    # end_time = time.perf_counter()
-    # time_taken = end_time - start_time
-    # print(f'Time taken: {time_taken:.2f} seconds')
-
+    end_time = time.perf_counter()
+    time_taken = end_time - start_time
+    print(f'Time taken: {time_taken:.2f} seconds')
 
 if __name__ == "__main__":
     main()
