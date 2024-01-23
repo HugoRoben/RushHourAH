@@ -7,35 +7,6 @@ class Vehicle(object):
         self.y = y
         self.length = length
         
-        # if 0 <= x <= 5:
-        #     self.x = x
-        # else:
-        #     raise ValueError('Invalid x {0}'.format(x))
-
-        # if 0 <= y <= 5:
-        #     self.y = y
-        # else:
-        #     raise ValueError('Invalid y {0}'.format(y))
-        
-        # if 2 <= length <= 3:
-        #     self.length = length
-        # else:
-        #     raise ValueError('Invalid length {0}'.format(length))
-        
-        # if orientation == 'H':
-        #     self.orientation = orientation
-        #     x_end = self.x + (self.length - 1)
-        #     y_end = self.y
-        # elif orientation == 'V':
-        #     self.orientation = orientation
-        #     x_end = self.x
-        #     y_end = self.y + (self.length - 1)
-        # else:
-        #     raise ValueError('Invalid orientation {0}'.format(orientation))
-
-        # if x_end > 5 or y_end > 5:
-        #     raise ValueError('Invalid configuration')
-        
         def __hash__(self):
             return hash(self.__repr__())
 

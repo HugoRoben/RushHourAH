@@ -19,6 +19,7 @@ class Grid:
         Postconditions:
             - A grid of the specified size is created with all cells initialized to None.
         """
+        
         self.vehicle_dict = {}
         self.vehicle_list = []  # List of vehicles on the grid
         self.size = size

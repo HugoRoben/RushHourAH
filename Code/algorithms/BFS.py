@@ -1,4 +1,5 @@
 from collections import deque
+from .Astar import *
 
 
 def breadth_first_search(RushGame, max_depth=100):
@@ -31,7 +32,6 @@ def breadth_first_search(RushGame, max_depth=100):
             visited_states.add(current_board)
 
             states_per_depth[depth] = states_per_depth.get(depth, 0) + 1
-
             if current_board.is_solved():
                 solutions.append(current_path)
                 return {
@@ -48,6 +48,7 @@ def breadth_first_search(RushGame, max_depth=100):
     #     'solutions': solutions,
     #     'depth_states': states_per_depth
     # }
+
 
 def solution_steps(solution_path):
     """

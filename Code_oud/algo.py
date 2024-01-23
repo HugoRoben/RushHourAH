@@ -23,6 +23,9 @@ class RushHourSolver:
         self.grid = Grid(grid_size)
         self.grid.load_data(gameboard_file)
 
+        self.result_list = []
+    
+
     def generate_random_move(self):
         vehicle = random.choice(list(self.grid.vehicle_dict))
         steps = random.choice([-1, 1]) # Aanpassen aan de maximale stapgrootte
