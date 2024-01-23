@@ -87,3 +87,4 @@ def determine_direction(vehicle_current, vehicle_next):
         return 'D'  # Down
     elif vehicle_current.y > vehicle_next.y:
         return 'U'  # Up
+
