@@ -9,106 +9,128 @@ from Code.algorithms.Random import *
 from Code.algorithms.BFS import *
 from Code.algorithms.Astar import * 
 from Code.algorithms.IDAstar import * 
+from Code.visual import results
 
 # python3 main.py bfs --game_range '0-2'
 # python3 main.py bfs --single_game 0
 
+def process_results(data, unsolved_count):
+    results.visualize(data, unsolved_count)
+
+
 def parse_and_create_games(file_path, game_indices, dimension=6):
     with open(file_path, 'r') as file:
-        for i, line in enumerate(file):
-            if i in game_indices:
-                game_data = line.strip()
-                steps, board_config, num_configs = game_data.split()
-                vehicle_positions = {}
+        lines = file.readlines()
 
-                for j, char in enumerate(board_config):
-                    if char not in ['o', 'x']:  # vehicle found
-                        if char not in vehicle_positions:
-                            vehicle_positions[char] = [j]  # start position
-                        else:
-                            vehicle_positions[char].append(j)  # subsequent positions
+    for i in game_indices:
+        if i < len(lines):
+            game_data = lines[i].strip()
+            steps, board_config, num_configs = game_data.split()
+            vehicle_positions = {}
 
-                vehicles = []
-                for vehicle_id, positions in vehicle_positions.items():
-                    x, y = positions[0] % dimension, positions[0] // dimension
-                    length = len(positions)
-                    orientation = 'H' if positions[1] % dimension > positions[0] % dimension else 'V'
+            for j, char in enumerate(board_config):
+                if char not in ['o', 'x']:
+                    if char not in vehicle_positions:
+                        vehicle_positions[char] = [j]
+                    else:
+                        vehicle_positions[char].append(j)
 
-                    vehicles.append(Vehicle(vehicle_id, orientation, x, y, length))
+            vehicles = []
+            for vehicle_id, positions in vehicle_positions.items():
+                x, y = positions[0] % dimension, positions[0] // dimension
+                length = len(positions)
+                orientation = 'H' if positions[1] % dimension > positions[0] % dimension else 'V'
 
-                yield RushHour(set(vehicles), dimension)
+                vehicles.append(Vehicle(vehicle_id, orientation, x, y, length))
+
+            yield RushHour(set(vehicles), dimension)
+
+
+def solve_with_astar(rush_game):
+    start_time = time.perf_counter()
+    results = Astar(rush_game).astar_search_single_ended(rush_game)
+    end_time = time.perf_counter()
+    if results is not None:
+        steps = len(results)
+        return {"steps": steps, "time": end_time - start_time}, 0
+    else:
+        return {"steps": None, "time": end_time - start_time}, 1
+
+def solve_with_idastar(rush_game):
+    start_time = time.perf_counter()
+    results = IDAstar(rush_game).idastar_search(rush_game)
+    end_time = time.perf_counter()
+    if results is not None:
+        steps = len(results)
+        return {"steps": steps, "time": end_time - start_time}, 0
+    else:
+        return {"steps": None, "time": end_time - start_time}, 1
+
+def solve_with_iddfs(rush_game):
+    start_time = time.perf_counter()
+    results = iterative_deepening_search(rush_game, max_depth=250)
+    end_time = time.perf_counter()
+    if results['solutions']:
+        solution = results['solutions'][0]
+        steps = len(solution)
+        return {"steps": steps, "time": end_time - start_time}, 0
+    else:
+        return {"steps": None, "time": end_time - start_time}, 1
+
+def solve_with_bfs(rush_game):
+    start_time = time.perf_counter()
+    results = breadth_first_search(rush_game, max_depth=10000)
+    end_time = time.perf_counter()
+    if results['solutions']:
+        solution = results['solutions'][0]
+        steps = len(solution)
+        return {"steps": steps, "time": end_time - start_time}, 0
+    else:
+        return {"steps": None, "time": end_time - start_time}, 1
+
 
 
 def main():
-    start_time = time.perf_counter()
-
+    stats = {}
+    
     parser = argparse.ArgumentParser(description="Run Rush Hour solver algorithms.")
     parser.add_argument("algorithm", help="Algorithm to use (Astar, IDDFS, BFS)", type=str)
     parser.add_argument("--single_game", help="Single game number to solve", type=int)
     parser.add_argument("--game_range", help="Range of games to solve, e.g., '500-1000'", type=str)
   
     args = parser.parse_args()
-
     file = 'data/no_wall_rush.txt'
+    
     if args.single_game is not None:
         game_indices = [args.single_game]
+
     elif args.game_range is not None:
         start, end = map(int, args.game_range.split('-'))
         game_indices = list(range(start, end + 1))
+
     else:
         print("Please specify either --single_game or --game_range")
         return
 
     rush_games = parse_and_create_games(file, game_indices)
-    # print(rush_games)
+    unsolved_count = 0 
     
-    for rush_game in rush_games:
+    for index, rush_game in enumerate(rush_games):
         if args.algorithm.lower() == 'astar':
-            results = Astar(rush_game).astar_search_single_ended(rush_game)
-            if results is not None:
-                print(f'Board: {file}:')
-                print(results)
-    
+            stats[index], unsolved = solve_with_astar(rush_game)
         elif args.algorithm.lower() == 'idastar':
-            ida_star_solver = IDAstar(rush_game)
-            results = ida_star_solver.idastar_search(rush_game)
-            if results is not None:
-                print(f'Board: {file}:')
-                print(f'Solved in {results} iterations')
-            else:
-                print("No solution found")
-
+            stats[index], unsolved = solve_with_idastar(rush_game)
         elif args.algorithm.lower() == 'iddfs':
-            results = iterative_deepening_search(rush_game, max_depth=500)
-            if results['solutions']:
-                solution = results['solutions'][0]
-                steps = solution_steps(solution)
-                number_steps = len(solution)
-                print(f'Board: {file}:')
-                steps_output = ', '.join(f'{step}' for step in steps)
-                print(f'Solved in {number_steps} steps: {steps_output}')
-            else:
-                print("No solution found")
-
+            stats[index], unsolved = solve_with_iddfs(rush_game)
         elif args.algorithm.lower() == 'bfs':
-            results = breadth_first_search(rush_game, max_depth=500)
-            if results['solutions']:
-                solution = results['solutions'][0]
-                steps = solution_steps(solution)
-                number_steps = len(steps)
-                # print(f'Board: {file}:')
-                # steps_output = ', '.join(f'{step}' for step in steps)
-                # print(f'Solved in {number_steps} steps: {steps_output}')
-                print(f'Solved in {number_steps} steps')
-            else:
-                print("No solution found")
-
+            stats[index], unsolved = solve_with_bfs(rush_game)
         else:
             print("Invalid algorithm. Please choose from Astar, IDDFS, or BFS.")
+            continue
 
-    end_time = time.perf_counter()
-    time_taken = end_time - start_time
-    print(f'Time taken: {time_taken:.2f} seconds')
+        unsolved_count += unsolved
+
+    process_results(stats, unsolved_count)
 
 
 # def load_file(rushhour_file, dimension):
@@ -140,7 +162,7 @@ def main():
 #         results = Astar(rush_game).astar_search_single_ended(rush_game)
 #         if results is not None:
 #             print(f'Board: {file}:')
-#             print(results)
+#             # print(results)
     
 #     elif args.algorithm.lower() == 'idastar':
 #         ida_star_solver = IDAstar(rush_game)

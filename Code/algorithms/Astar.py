@@ -19,7 +19,7 @@ class Astar:
 
     def get_red_car(self, state):
         for vehicle in state.vehicles:
-            if vehicle.id == 'X':
+            if vehicle.id == 'A':
                 red_car = vehicle
                 return red_car
         # return None if red car not found
@@ -108,7 +108,7 @@ class Astar:
         extra_cost_long_cars = self.three_long_blockers(state)
         distance_cost = self.heuristic_distance_to_exit(state)
 
-        if extra_cost_long_cars >= 2:
+        if extra_cost_long_cars >= 1:
             distance_weight = .5
             length_weight = 2        
         if extra_cost_long_cars == 0:
@@ -135,34 +135,34 @@ class Astar:
 
     def astar_search_single_ended(self, initial_state, max_iterations=100000000):
 
-        solution_path = []
         # calculate heuristic function of the starting state
         open_states = [HeapItem(self.total_heuristic_function(initial_state), initial_state)]
         closed_states = set()
         open_set = {initial_state}
         iterations = 0
-        print(initial_state)
+        # print(initial_state)
 
         """With look ahead"""
         while open_states:
             if iterations >= max_iterations:
-                print("Maximum iterations reached")
+                # print("Maximum iterations reached")
                 break
 
             current_state = heapq.heappop(open_states).rush_hour_obj
-            # if (iterations % 1 == 0):
+            # if (iterations % 10 == 0):
             #     visualizer = Visualizer(600, 600)
             #     visualizer.draw(current_state)
 
             if self.is_winning_state(current_state):
-                print(current_state)
+                # print(current_state)
                 solution_path = self.reconstruct_path(current_state)
-                visualizer = Visualizer(600, 600) 
-                visualizer.animate_solution(solution_path)
+                # visualizer = Visualizer(600, 600) 
+                # visualizer.animate_solution(solution_path)
+                # print(len(solution_path))
                 return solution_path
 
             closed_states.add(current_state)
-            future_states = self.begin_state.generate_future_states(current_state, depth=2)
+            future_states = self.begin_state.generate_future_states(current_state, depth=3)
 
             for next_state in future_states:
                 if next_state not in closed_states and next_state not in open_set: 
@@ -182,14 +182,18 @@ class Astar:
         #         break
 
         #     current_state = heapq.heappop(open_states).rush_hour_obj
-        #     solution_path.append(current_state)
+            
+        #     # if (iterations % 100 == 0):
+        #     #     visualizer = Visualizer(600, 600)
+        #     #     visualizer.draw(current_state)
+            
         #     if self.is_winning_state(current_state):
         #         solution_path = self.reconstruct_path(current_state)
         #         print("Solution found in {} moves".format(len(solution_path) - 1))
         # #         print(current_state)
         # #         solution_path = self.reconstruct_path(current_state)
-        #         visualizer = Visualizer(600, 600) 
-        #         visualizer.animate_solution(solution_path)
+        #         # visualizer = Visualizer(600, 600) 
+        #         # visualizer.animate_solution(solution_path)
         #         return solution_path
 
         #     closed_states.add(current_state)
