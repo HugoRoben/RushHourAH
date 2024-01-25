@@ -10,12 +10,10 @@ from Code.algorithms.BFS import *
 from Code.algorithms.Astar import * 
 from Code.algorithms.IDAstar import * 
 from Code.visual import results
+from tqdm import tqdm
 
 # python3 main.py bfs --game_range '0-2'
 # python3 main.py bfs --single_game 0
-
-def process_results(data, unsolved_count):
-    results.visualize(data, unsolved_count)
 
 
 def parse_and_create_games(file_path, game_indices, dimension=6):
@@ -46,15 +44,16 @@ def parse_and_create_games(file_path, game_indices, dimension=6):
             yield RushHour(set(vehicles), dimension)
 
 
-def solve_with_astar(rush_game):
+def solve_with_astar(rush_game, neighbour_depth = 3):
     start_time = time.perf_counter()
-    results = Astar(rush_game).astar_search_single_ended(rush_game)
+    results = Astar(rush_game).astar_search_single_ended(rush_game, neighbour_depth)
     end_time = time.perf_counter()
     if results is not None:
         steps = len(results)
         return {"steps": steps, "time": end_time - start_time}, 0
     else:
-        return {"steps": None, "time": end_time - start_time}, 1
+        return {"steps": 0, "time": 0}, 1
+
 
 def solve_with_idastar(rush_game):
     start_time = time.perf_counter()
@@ -64,30 +63,31 @@ def solve_with_idastar(rush_game):
         steps = len(results)
         return {"steps": steps, "time": end_time - start_time}, 0
     else:
-        return {"steps": None, "time": end_time - start_time}, 1
+        return {"steps": 0, "time": 0}, 1
+
 
 def solve_with_iddfs(rush_game):
     start_time = time.perf_counter()
-    results = iterative_deepening_search(rush_game, max_depth=250)
+    results = iterative_deepening_search(rush_game, max_depth=1000)
     end_time = time.perf_counter()
     if results['solutions']:
         solution = results['solutions'][0]
         steps = len(solution)
         return {"steps": steps, "time": end_time - start_time}, 0
     else:
-        return {"steps": None, "time": end_time - start_time}, 1
+        return {"steps": 0, "time": 0}, 1
+
 
 def solve_with_bfs(rush_game):
     start_time = time.perf_counter()
-    results = breadth_first_search(rush_game, max_depth=10000)
+    results = breadth_first_search(rush_game, max_depth=250)
     end_time = time.perf_counter()
     if results['solutions']:
         solution = results['solutions'][0]
         steps = len(solution)
         return {"steps": steps, "time": end_time - start_time}, 0
     else:
-        return {"steps": None, "time": end_time - start_time}, 1
-
+        return {"steps": 0, "time": 0}, 1
 
 
 def main():
@@ -97,40 +97,67 @@ def main():
     parser.add_argument("algorithm", help="Algorithm to use (Astar, IDDFS, BFS)", type=str)
     parser.add_argument("--single_game", help="Single game number to solve", type=int)
     parser.add_argument("--game_range", help="Range of games to solve, e.g., '500-1000'", type=str)
+    parser.add_argument("--all_games", help="Solve all games", action="store_true")
   
     args = parser.parse_args()
-    file = 'data/no_wall_rush.txt'
+    file_path = 'boards/no_wall_rush.txt'
     
-    if args.single_game is not None:
-        game_indices = [args.single_game]
+    # Read the total number of games
+    with open(file_path, 'r') as file:
+        total_games = len(file.readlines())
 
+    if args.all_games:
+        game_indices = list(range(total_games))
+    elif args.single_game is not None:
+        game_indices = [args.single_game]
     elif args.game_range is not None:
         start, end = map(int, args.game_range.split('-'))
         game_indices = list(range(start, end + 1))
-
     else:
-        print("Please specify either --single_game or --game_range")
+        print("Please specify one of --single_game, --game_range, or --all_games")
         return
 
-    rush_games = parse_and_create_games(file, game_indices)
+    # Assuming parse_and_create_games and the solver functions are defined elsewhere
+    rush_games = parse_and_create_games(file_path, game_indices)
     unsolved_count = 0 
+    steps = []
+    times = []
     
-    for index, rush_game in enumerate(rush_games):
+    for index, rush_game in enumerate(tqdm(rush_games, desc="Processing games")):
         if args.algorithm.lower() == 'astar':
             stats[index], unsolved = solve_with_astar(rush_game)
+            algo = 'A-STAR'
         elif args.algorithm.lower() == 'idastar':
             stats[index], unsolved = solve_with_idastar(rush_game)
+            algo = 'IDA-STAR'
         elif args.algorithm.lower() == 'iddfs':
             stats[index], unsolved = solve_with_iddfs(rush_game)
+            algo = 'IDDFS'
         elif args.algorithm.lower() == 'bfs':
             stats[index], unsolved = solve_with_bfs(rush_game)
+            algo = 'BFS'
         else:
             print("Invalid algorithm. Please choose from Astar, IDDFS, or BFS.")
             continue
 
         unsolved_count += unsolved
+        if stats[index]['steps'] is not None:
+            steps.append(stats[index]['steps'])
+            times.append(stats[index]['time'])
+        
+        # print(f"Game {index} completed. Steps: {stats[index]['steps']} Time: {stats[index]['time']:.2f} seconds")
 
-    process_results(stats, unsolved_count)
+    if not times or not steps:
+        print("No data for visualization available.")
+        return
+
+    # Assuming process_results is defined elsewhere
+    results.visualize(steps, times, algo)
+    results.desc_stats(steps, times, unsolved_count, algo)
+
+
+if __name__ == "__main__":
+    main()
 
 
 # def load_file(rushhour_file, dimension):
@@ -204,10 +231,3 @@ def main():
 #     time_taken = end_time - start_time
 #     print(f'Time taken: {time_taken:.2f} seconds')
 
-
-
-
-
-
-if __name__ == "__main__":
-    main()

@@ -1,7 +1,7 @@
 from ..classes.VehicleClass import Vehicle
 from ..classes.RushClass import *
 import heapq
-from ..visual.visualizer import *
+from matplotlib import pyplot 
 
 
 class HeapItem:
@@ -13,13 +13,14 @@ class HeapItem:
         return self.priority < other.priority
 
 class Astar:
+
     def __init__(self, begin_state) -> None:
         self.begin_state = begin_state
         self.vehicles = begin_state.vehicles
 
     def get_red_car(self, state):
         for vehicle in state.vehicles:
-            if vehicle.id == 'A':
+            if vehicle.id == 'X':
                 red_car = vehicle
                 return red_car
         # return None if red car not found
@@ -69,25 +70,36 @@ class Astar:
                 if v.y == red_car.y - 1 or v.y == red_car.y or (v.y == red_car.y - 2 and v.length == 3):
                     blocking_cars.append(v)
         return blocking_cars
+
+    def second_blockers(self, state):
+        """get the cars blocking the cars that are blocking the red car"""
+        blockers = self.get_blocking_cars(state)
+        second_blockers = []
+        for blocker in blockers:
+            for v in state.vehicles:
+                    if self.is_blocking(blocker, v):
+                        second_blockers.append(v)
+        return second_blockers
+   
+    def third_blockers(self, state, second_blockers, blockers):
+        """get the car that are blocking the cars from second_blockers"""
+        third_blockers = []
+        for blocker in second_blockers:
+            for v in state.vehicles:
+                if v not in second_blockers and v not in blockers:
+                        if self.is_blocking(blocker, v):
+                            third_blockers.append(v)
+        return third_blockers
     
-    def blocking_cars_iterative(self, state, max_depth):
-        already_considered = set()
-        current_level_blockers = set(self.get_blocking_cars(state))
-        all_blockers = set(current_level_blockers)
-        already_considered.update(current_level_blockers)
-
-        for depth in range(2, max_depth + 1):
-            next_level_blockers = set()
-            for blocker in current_level_blockers:
-                for v in state.vehicles:
-                    if self.is_blocking(blocker, v) and v not in already_considered:
-                        next_level_blockers.add(v)
-                        already_considered.add(v)
-
-            current_level_blockers = next_level_blockers
-            all_blockers.update(current_level_blockers)
-
-        return all_blockers
+    def fourth_blockers(self, state, third_blockers, second_blockers, blockers):
+        """get the car that are blocking the cars from third_blockers"""
+        fourth_blockers = []
+        for blocker in third_blockers:
+            for v in state.vehicles:
+                if v not in third_blockers and v not in second_blockers and v not in blockers:
+                        if self.is_blocking(blocker, v):
+                            fourth_blockers.append(v)
+        return fourth_blockers
 
     def three_long_blockers(self, state):
         blockers = self.get_blocking_cars(state)
@@ -96,25 +108,25 @@ class Astar:
             if v.length == 3: count +=1
         return count 
 
-    def heuristic_distance_to_exit(self, state):
-        red_car = self.get_red_car(state)
-        return (state.dim_board - 2 - red_car.x)
-    
-    def total_heuristic_function(self, state):
-        length_weight = 1
-        distance_weight = 1
+    def total_heuristic_function(self, state, prev_state):
+        blockers = self.get_blocking_cars(state)
+        second_blockers = self.second_blockers(state)
+        third_blockers = self.third_blockers(state, second_blockers, blockers)
+        fourth_blockers = self.fourth_blockers(state, third_blockers, second_blockers, blockers)
 
-        blocking_cost = len(self.blocking_cars_iterative(state, 3))
+        blocking_cost = len(blockers) + len(second_blockers) + len(third_blockers) + len(fourth_blockers)
         extra_cost_long_cars = self.three_long_blockers(state)
         distance_cost = self.heuristic_distance_to_exit(state)
 
-        if extra_cost_long_cars >= 1:
-            distance_weight = .5
-            length_weight = 2        
+        distance_weight = 1
         if extra_cost_long_cars == 0:
             distance_weight = 2
 
-        return blocking_cost + distance_cost * distance_weight + extra_cost_long_cars * length_weight
+        return blocking_cost + distance_cost * distance_weight + extra_cost_long_cars
+        
+    def heuristic_distance_to_exit(self, state):
+        red_car = self.get_red_car(state)
+        return (state.dim_board - 2 - red_car.x)
 
     def is_winning_state(self, state):
         """
@@ -122,130 +134,39 @@ class Astar:
         """
         return len(self.get_blocking_cars(state)) == 0
     
-    def reconstruct_path(self, end_state):
-        """
-        Reconstruct the solution path from the end state.
-        """
-        path = []
-        current_state = end_state
-        while current_state is not None:
-            path.insert(0, current_state)
-            current_state = current_state.parent
-        return path
-
     def astar_search_single_ended(self, initial_state, max_iterations=100000000):
-
+        # store the heuristic value of all the used states in a list to plot
+        heuristic_list = []
         # calculate heuristic function of the starting state
-        open_states = [HeapItem(self.total_heuristic_function(initial_state), initial_state)]
+        open_states = [HeapItem(self.total_heuristic_function(initial_state, initial_state), initial_state)]
         closed_states = set()
         open_set = {initial_state}
         iterations = 0
-        # print(initial_state)
 
-        """With look ahead"""
         while open_states:
             if iterations >= max_iterations:
-                # print("Maximum iterations reached")
+                print("Maximum iterations reached, terminating search.")
                 break
 
             current_state = heapq.heappop(open_states).rush_hour_obj
-            # if (iterations % 10 == 0):
-            #     visualizer = Visualizer(600, 600)
-            #     visualizer.draw(current_state)
 
             if self.is_winning_state(current_state):
-                # print(current_state)
-                solution_path = self.reconstruct_path(current_state)
-                # visualizer = Visualizer(600, 600) 
-                # visualizer.animate_solution(solution_path)
-                # print(len(solution_path))
-                return solution_path
+                pyplot.plot(heuristic_list)
+                pyplot.show()
+                return iterations
 
+            # print(f"Current State: {current_state}")
             closed_states.add(current_state)
-            future_states = self.begin_state.generate_future_states(current_state, depth=3)
 
-            for next_state in future_states:
-                if next_state not in closed_states and next_state not in open_set: 
-                    heapq.heappush(open_states, HeapItem(self.total_heuristic_function(next_state), next_state))
+            for next_state in current_state.moves():
+                if next_state not in closed_states and next_state not in open_set:
+                    heapq.heappush(open_states, HeapItem(self.total_heuristic_function(next_state, current_state), next_state))
                     open_set.add(next_state)
-            
-            
+                    heuristic_list.append(self.total_heuristic_function(next_state, current_state))
+            # print(iterations)
             iterations += 1
 
         print("No solution found")
+        pyplot.plot(heuristic_list)
+        pyplot.show()
         return None
-
-        # """ without look-ahead"""
-        # while open_states:
-        #     if iterations >= max_iterations:
-        #         print("Maximum iterations reached, terminating search.")
-        #         break
-
-        #     current_state = heapq.heappop(open_states).rush_hour_obj
-            
-        #     # if (iterations % 100 == 0):
-        #     #     visualizer = Visualizer(600, 600)
-        #     #     visualizer.draw(current_state)
-            
-        #     if self.is_winning_state(current_state):
-        #         solution_path = self.reconstruct_path(current_state)
-        #         print("Solution found in {} moves".format(len(solution_path) - 1))
-        # #         print(current_state)
-        # #         solution_path = self.reconstruct_path(current_state)
-        #         # visualizer = Visualizer(600, 600) 
-        #         # visualizer.animate_solution(solution_path)
-        #         return solution_path
-
-        #     closed_states.add(current_state)
-
-        #     for next_state in current_state.moves():
-        #         if next_state not in closed_states and next_state not in open_set:
-        #             heapq.heappush(open_states, HeapItem(self.total_heuristic_function(next_state), next_state))
-        #             open_set.add(next_state)
-
-        #     iterations += 1
-
-        # print("No solution found")
-        # return None
-
-
-class PatternRecognition:
-
-    @staticmethod
-    def is_oscillating(vehicle_history, id, threshold=3):
-        """
-        Check if a vehicle is oscillating between two points.
-
-        Args:
-        vehicle_history (dict): The history of vehicle movements.
-        id (str): The vehicle's id.
-        threshold (int): How many times the vehicle needs to oscillate to be considered as such.
-
-        Returns:
-        bool: True if the vehicle is oscillating, False otherwise.
-        """
-        history = vehicle_history[id]
-        if len(history) < threshold * 2:
-            return False
-
-        # Check the last few positions for an oscillation pattern
-        for i in range(1, threshold + 1):
-            if history[-i] != history[-i * 2]:
-                return False
-        return True
-    
-    def make_alternative_move_or_lock(self, vehicle, state):
-        valid_moves = state.moves() 
-        last_two_positions = state.vehicle_history[vehicle.id][-2:]
-
-        alternative_moves = [move for move in valid_moves if \
-                            move.grid[state.vehicle_history[vehicle.id][-1][0]][state.vehicle_history[vehicle.id][-1][1]]\
-                            not in last_two_positions]
-
-        if alternative_moves:
-            # new_position = alternative_moves[0].position
-            # if self.is_valid_move(vehicle, new_position):
-            #     vehicle.move_to(new_position)
-            print("alternative moves found")
-        else:
-            vehicle.lock_for_n_states(3)

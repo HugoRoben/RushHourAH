@@ -1,4 +1,4 @@
-def iterative_deepening_search(RushGame, max_depth):
+def iterative_deepening_search(RushGame, max_depth=500):
     """
     Perform an iterative deepening depth-first search on a RushHour board to find solutions.
 

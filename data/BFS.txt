@@ -1,0 +1,22 @@
+
+Puzzle Statistics:
+-------------------------
+Total Puzzles  : 8
+Solved         : 8
+Unsolved       : 0
+
+
+Time Statistics:
+-------------------------
+Total Time     : 4.482
+Mean           : 0.560
+Min            : 0.086
+Max            : 2.113
+
+
+Steps Statistics:
+-------------------------
+Total Steps    : 675
+Mean           : 84.375
+Min            : 77
+Max            : 93
