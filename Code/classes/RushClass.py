@@ -60,16 +60,16 @@ class RushHour(object):
                     new_vehicles = self.vehicles.copy()
                     new_vehicles.remove(v)
                     new_vehicles.add(new_v)
-                    # yield RushHour(new_vehicles, self.dim_board)
-                    yield RushHour(new_vehicles, self.dim_board, self.move_count + 1)
+                    yield RushHour(new_vehicles, self.dim_board, parent = self)
+                    # yield RushHour(new_vehicles, self.dim_board, self.move_count + 1)
 
                 if v.x + v.length < self.dim_board and board[v.y][v.x + v.length] == ' ':
                     new_v = Vehicle(v.id, v.orientation, v.x + 1, v.y, v.length)
                     new_vehicles = self.vehicles.copy()
                     new_vehicles.remove(v)
                     new_vehicles.add(new_v)
-                    # yield RushHour(new_vehicles, self.dim_board)
-                    yield RushHour(new_vehicles, self.dim_board, self.move_count + 1)
+                    yield RushHour(new_vehicles, self.dim_board, parent = self)
+                    # yield RushHour(new_vehicles, self.dim_board, self.move_count + 1)
 
             else:
                 if v.y - 1 >= 0 and board[v.y - 1][v.x] == ' ':
@@ -77,18 +77,27 @@ class RushHour(object):
                     new_vehicles = self.vehicles.copy()
                     new_vehicles.remove(v)
                     new_vehicles.add(new_v)
-                    # yield RushHour(new_vehicles, self.dim_board)
-                    yield RushHour(new_vehicles, self.dim_board, self.move_count + 1)
+                    yield RushHour(new_vehicles, self.dim_board, parent = self)
+                    # yield RushHour(new_vehicles, self.dim_board, self.move_count + 1)
 
                 if v.y + v.length < self.dim_board and board[v.y + v.length][v.x] == ' ':
                     new_v = Vehicle(v.id, v.orientation, v.x, v.y + 1, v.length)
                     new_vehicles = self.vehicles.copy()
                     new_vehicles.remove(v)
                     new_vehicles.add(new_v)
-                    # yield RushHour(new_vehicles, self.dim_board)
-                    yield RushHour(new_vehicles, self.dim_board, self.move_count + 1)
+                    yield RushHour(new_vehicles, self.dim_board, parent = self)
+                    # yield RushHour(new_vehicles, self.dim_board, self.move_count + 1)
 
-                    
+    def generate_future_states(self, current_state, depth=3):
+        if depth == 0:
+            return [current_state]
+
+        future_states = []
+        for next_state in current_state.moves():
+            future_states.extend(self.generate_future_states(next_state, depth - 1))
+
+        return future_states
+    
     def is_solved(self):
         """Check if the puzzle is solved."""
         for vehicle in self.vehicles:

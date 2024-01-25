@@ -20,7 +20,9 @@ def breadth_first_search(RushGame, max_depth=100):
         depth = len(current_path)
         if depth > max_depth:
             break
-
+        # if (len(visited_states) % 1000 == 0):
+        #     visualizer = Visualizer(600, 600)
+        #     visualizer.draw(current_board)
         if current_board not in visited_states:
             visited_states.add(current_board)
 
@@ -35,9 +37,6 @@ def breadth_first_search(RushGame, max_depth=100):
                 break
             else:
                 for move in current_board.moves():
-                    
-                    astar = Astar(move)
-                    if astar.total_heuristic_function(move) < 17:
                         visit_queue.appendleft((move, path + (current_board,)))
 
     return {

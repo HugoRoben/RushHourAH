@@ -1,26 +1,16 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-<<<<<<< HEAD
-=======
 def visualize(data, unsolved_count, file_name='iddfs_100_maxdepth100.png'):
     times = [data[key]['time'] for key in data if 'time' in data[key]]
     steps = [data[key]['steps'] for key in data if 'steps' in data[key] and data[key]['steps'] is not None]
->>>>>>> 6db02e7 (kleine aanpassing)
 
 def visualize(steps, times, algo, save_to_file=True):
     if not times or not steps:
         print("No data for visualization available.")
         return
-<<<<<<< HEAD
-
-    num_bins = 50000
-    title_name = algo
-    file_name = f'data/{title_name}.png'
-=======
     
     num_bins = 500
->>>>>>> 6db02e7 (kleine aanpassing)
 
     # Set up the figure and axes
     fig, axs = plt.subplots(1, 2, figsize=(12, 6))
@@ -39,15 +29,10 @@ def visualize(steps, times, algo, save_to_file=True):
     # Add some spacing between the histograms
     plt.subplots_adjust(wspace=0.3)
 
-<<<<<<< HEAD
-    # Global title
-    plt.suptitle(f'{title_name} - Comparison of Time Taken and Number of Steps')
-=======
     plt.suptitle('Comparison of Time Taken and Number of Steps')
     plt.savefig(file_name)
     print(f"Plot saved as '{file_name}'")
     desc_stats(stats_time, stats_steps, total, solved, unsolved)
->>>>>>> 6db02e7 (kleine aanpassing)
 
 
     if save_to_file:
@@ -57,15 +42,12 @@ def visualize(steps, times, algo, save_to_file=True):
     else:
         plt.show()
 
-<<<<<<< HEAD
-=======
 def desc_stats(stats_time, stats_steps, total, solved_count, unsolved_count, save_to_file=True, filename="stats.txt"):
     headers = ["Type", "Total", "Solved", "Unsolved"] + list(stats_time.keys())
     data = [
         ["Time"] + [total, solved_count, unsolved_count] + list(stats_time.values()),
         ["Steps"] + [total, solved_count, unsolved_count] + list(stats_steps.values())
     ]
->>>>>>> 6db02e7 (kleine aanpassing)
 
 def desc_stats(steps, times, unsolved_count, algo, save_to_file=True):
     file_name = f'data/{algo}.txt'

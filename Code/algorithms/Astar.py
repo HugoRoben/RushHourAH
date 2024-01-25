@@ -108,7 +108,7 @@ class Astar:
         extra_cost_long_cars = self.three_long_blockers(state)
         distance_cost = self.heuristic_distance_to_exit(state)
 
-        if extra_cost_long_cars >= 2:
+        if extra_cost_long_cars >= 1:
             distance_weight = .5
             length_weight = 2        
         if extra_cost_long_cars == 0:
@@ -149,24 +149,27 @@ class Astar:
                 break
 
             current_state = heapq.heappop(open_states).rush_hour_obj
-            # if (iterations % 1 == 0):
-            #     visualizer = Visualizer(600, 600)
-            #     visualizer.draw(current_state)
+            if (iterations % 1000 == 0):
+                visualizer = Visualizer(600, 600)
+                visualizer.draw(current_state)
 
             if self.is_winning_state(current_state):
-                print(current_state)
                 solution_path = self.reconstruct_path(current_state)
                 visualizer = Visualizer(600, 600) 
                 visualizer.animate_solution(solution_path)
                 return solution_path
 
             closed_states.add(current_state)
-            future_states = self.begin_state.generate_future_states(current_state, depth=1)
+            future_states = self.begin_state.generate_future_states(current_state, depth=2)
+            for state in future_states:
+                if state not in closed_states and state not in open_set:
+                    heapq.heappush(open_states, HeapItem(self.total_heuristic_function(state), state))
+                    open_set.add(state)
 
-            for next_state in future_states:
-                if next_state not in closed_states and next_state not in open_set: 
-                    heapq.heappush(open_states, HeapItem(self.total_heuristic_function(next_state), next_state))
-                    open_set.add(next_state)
+            # for move in current_state.moves():
+            #     if move not in closed_states and move not in open_set: 
+            #         heapq.heappush(open_states, HeapItem(self.total_heuristic_function(move), move))
+            #         open_set.add(move)
             
             
             iterations += 1
