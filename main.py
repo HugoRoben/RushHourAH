@@ -152,7 +152,11 @@ def solve_with_idastar(rush_game):
 
 def solve_with_iddfs(rush_game):
     start_time = time.perf_counter()
+<<<<<<< HEAD
     results = iterative_deepening_search(rush_game, max_depth=1000)
+=======
+    results = iterative_deepening_search(rush_game, max_depth=500)
+>>>>>>> 6db02e7 (kleine aanpassing)
     end_time = time.perf_counter()
     if results['solutions']:
         solution = results['solutions'][0]
