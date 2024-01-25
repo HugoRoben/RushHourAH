@@ -17,7 +17,7 @@ def breadth_first_search(RushGame, max_depth=100):
         current_board, path = visit_queue.pop()
         current_path = path + (current_board,)
 
-        depth = len(current_path)  # The depth is the length of the path
+        depth = len(current_path)
         if depth > max_depth:
             break
 
@@ -26,21 +26,19 @@ def breadth_first_search(RushGame, max_depth=100):
 
             if current_board.is_solved():
                 solutions.append(path + (current_board,))
-                # visualizer = Visualizer(600, 600) 
-                # visualizer.animate_solution(solutions)
-                # solution = track_path(current_board)
-                # break  # or continue searching for all solutions
             if solutions:
-    # Assuming you want to animate the first found solution for example
                 first_solution = solutions[0]
-                first_solution_states = [state for state in first_solution]  # Extract game states from the tuple
+                first_solution_states = [state for state in first_solution]
 
                 visualizer = Visualizer(600, 600)
                 visualizer.animate_solution(first_solution_states)
                 break
             else:
                 for move in current_board.moves():
-                    visit_queue.appendleft((move, path + (current_board,)))
+                    
+                    astar = Astar(move)
+                    if astar.total_heuristic_function(move) < 17:
+                        visit_queue.appendleft((move, path + (current_board,)))
 
     return {
         'visited': len(visited_states),
