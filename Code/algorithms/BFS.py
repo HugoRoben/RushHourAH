@@ -3,17 +3,9 @@ from .Astar import *
 from ..visual.visualizer import *
 
 
-def breadth_first_search(RushGame, max_depth=100):
-    """
-    Perform a breadth-first search on a RushHour board to find solutions.
-    
-    Args:
-        rush_hour_board (RushHour): The game board.
-        max_depth (int, optional): Maximum search depth. Defaults to 25.
+from collections import deque
 
-    Returns:
-        dict: Contains visited states, solutions, and state counts per depth.
-    """
+def breadth_first_search(RushGame, max_depth=100):
     visited_states = set()
     solutions = []
     states_per_depth = {}
@@ -56,6 +48,13 @@ def breadth_first_search(RushGame, max_depth=100):
         'depth_states': states_per_depth
     }
 
+# def track_path(end_state):
+#     current_board = end_state
+#     path = []
+#     while current_board is not None:
+#         path.insert(0, current_board)
+#         current_board = current_board.parent
+#     return path
 
 def solution_steps(solution_path):
     """
@@ -79,6 +78,7 @@ def solution_steps(solution_path):
 
     return steps
 
+
 def determine_direction(vehicle_current, vehicle_next):
     """
     Determine the direction of the vehicle's movement.
@@ -98,4 +98,3 @@ def determine_direction(vehicle_current, vehicle_next):
         return 'D'  # Down
     elif vehicle_current.y > vehicle_next.y:
         return 'U'  # Up
-

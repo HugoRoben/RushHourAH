@@ -6,24 +6,17 @@ class Vehicle(object):
         self.x = x
         self.y = y
         self.length = length
-        
+
     def __hash__(self):
-        return hash(self.__repr__())
+        return hash((self.id, self.orientation, self.x, self.y, self.length))
 
     def __eq__(self, other):
+        if not isinstance(other, Vehicle):
+            return False
         return self.__dict__ == other.__dict__
-
-    # def __hash__(self):
-    #     return hash((self.id, self.orientation, self.x, self.y, self.length))
-
-    # def __eq__(self, other):
-    #     if not isinstance(other, Vehicle):
-    #         return False
-    #     return self.__dict__ == other.__dict__
 
     def __ne__(self, other):
         return not self.__eq__(other)
 
     def __repr__(self):
-        return "Vehicle({0}, {1}, {2}, {3})".format(self.id, self.orientation, self.x, self.y)
-
+        return f"Vehicle({self.id}, {self.orientation}, {self.x}, {self.y}, {self.length})"
