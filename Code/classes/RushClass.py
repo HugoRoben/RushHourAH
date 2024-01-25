@@ -106,6 +106,6 @@ class RushHour(object):
     def is_solved(self):
         """Check if the puzzle is solved."""
         for vehicle in self.vehicles:
-            if vehicle.id == 'A':
+            if vehicle.id == 'X':
                 return vehicle.x + vehicle.length == self.dim_board
         return False

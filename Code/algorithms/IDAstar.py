@@ -50,59 +50,59 @@ class IDAstar(Astar):
 
 
 
-# class IDAStar:
-#     def __init__(self, begin_state):
-#         self.begin_state = begin_state
+class IDAStar:
+    def __init__(self, begin_state):
+        self.begin_state = begin_state
 
-#     def ida_star_search(self):
-#         threshold = self.heuristic(self.begin_state)
-#         while True:
-#             visited = set()
-#             temp, new_threshold = self.search(self.begin_state, 0, threshold, visited)
-#             if temp is not None:
-#                 return temp
-#             if new_threshold == float('inf'):
-#                 return None
-#             threshold = new_threshold
+    def ida_star_search(self):
+        threshold = self.heuristic(self.begin_state)
+        while True:
+            visited = set()
+            temp, new_threshold = self.search(self.begin_state, 0, threshold, visited)
+            if temp is not None:
+                return temp
+            if new_threshold == float('inf'):
+                return None
+            threshold = new_threshold
 
-#     def search(self, state, g, threshold, visited):
-#         f = g + self.heuristic(state)
-#         if f > threshold or state in visited:
-#             return None, f
-#         visited.add(state)
-#         if state.is_solved():
-#             return g, f  # Return the depth at which the solution was found
-#         min_threshold = float('inf')
-#         for next_state in state.moves():
-#             temp, new_threshold = self.search(next_state, g + 1, threshold, visited)
-#             if temp is not None:
-#                 return temp, new_threshold
-#             if new_threshold < min_threshold:
-#                 min_threshold = new_threshold
-#         return None, min_threshold
+    def search(self, state, g, threshold, visited):
+        f = g + self.heuristic(state)
+        if f > threshold or state in visited:
+            return None, f
+        visited.add(state)
+        if state.is_solved():
+            return g, f  # Return the depth at which the solution was found
+        min_threshold = float('inf')
+        for next_state in state.moves():
+            temp, new_threshold = self.search(next_state, g + 1, threshold, visited)
+            if temp is not None:
+                return temp, new_threshold
+            if new_threshold < min_threshold:
+                min_threshold = new_threshold
+        return None, min_threshold
 
-#     def heuristic(self, state):
-#         red_car = self.get_red_car(state)
-#         if not red_car:
-#             return float('inf')  # No solution possible if the red car is not found
+    def heuristic(self, state):
+        red_car = self.get_red_car(state)
+        if not red_car:
+            return float('inf')  # No solution possible if the red car is not found
 
-#         distance_to_exit = state.dim_board - (red_car.x + red_car.length)
-#         blocking_vehicles = 0
-#         for vehicle in state.vehicles:
-#             if vehicle.orientation == 'V' and vehicle.x > red_car.x:
-#                 if red_car.y >= vehicle.y and red_car.y < vehicle.y + vehicle.length:
-#                     blocking_vehicles += 1
+        distance_to_exit = state.dim_board - (red_car.x + red_car.length)
+        blocking_vehicles = 0
+        for vehicle in state.vehicles:
+            if vehicle.orientation == 'V' and vehicle.x > red_car.x:
+                if red_car.y >= vehicle.y and red_car.y < vehicle.y + vehicle.length:
+                    blocking_vehicles += 1
 
-#         return distance_to_exit + blocking_vehicles
+        return distance_to_exit + blocking_vehicles
 
-#     def get_red_car(self, state):
-#         for vehicle in state.vehicles:
-#             if vehicle.id == 'X':
-#                 return vehicle
-#         return None
+    def get_red_car(self, state):
+        for vehicle in state.vehicles:
+            if vehicle.id == 'X':
+                return vehicle
+        return None
 
-#     def is_solved(self, state):
-#         red_car = self.get_red_car(state)
-#         if red_car and red_car.x + red_car.length == state.dim_board:
-#             return True
-#         return False
+    def is_solved(self, state):
+        red_car = self.get_red_car(state)
+        if red_car and red_car.x + red_car.length == state.dim_board:
+            return True
+        return False

@@ -1,5 +1,6 @@
 from collections import deque
 from .Astar import *
+from ..visual.visualizer import *
 
 
 def breadth_first_search(RushGame, max_depth=100):
@@ -33,8 +34,18 @@ def breadth_first_search(RushGame, max_depth=100):
 
             if current_board.is_solved():
                 solutions.append(path + (current_board,))
+                # visualizer = Visualizer(600, 600) 
+                # visualizer.animate_solution(solutions)
                 # solution = track_path(current_board)
-                break  # or continue searching for all solutions
+                # break  # or continue searching for all solutions
+            if solutions:
+    # Assuming you want to animate the first found solution for example
+                first_solution = solutions[0]
+                first_solution_states = [state for state in first_solution]  # Extract game states from the tuple
+
+                visualizer = Visualizer(600, 600)
+                visualizer.animate_solution(first_solution_states)
+                break
             else:
                 for move in current_board.moves():
                     visit_queue.appendleft((move, path + (current_board,)))

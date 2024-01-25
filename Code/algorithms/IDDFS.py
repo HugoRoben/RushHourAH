@@ -1,3 +1,5 @@
+from ..visual.visualizer import *
+
 def iterative_deepening_search(RushGame, max_depth=500):
     """
     Perform an iterative deepening depth-first search on a RushHour board to find solutions.
@@ -12,7 +14,10 @@ def iterative_deepening_search(RushGame, max_depth=500):
     for depth in range(1, max_depth + 1):
         visited = set()
         solution_path = depth_limited_search(RushGame, depth, visited)
+
         if solution_path is not None:
+            visualizer = Visualizer(600, 600) 
+            visualizer.animate_solution(solution_path)
             return {
                 'solutions': [solution_path],
                 'visited': len(visited),
@@ -38,6 +43,7 @@ def depth_limited_search(state, limit, visited, path=()):
     visited.add(state)
 
     if state.is_solved():
+
         return path + (state,)
     elif limit > 0:
         for move in state.moves():
