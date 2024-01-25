@@ -1,4 +1,5 @@
 from ..visual.visualizer import *
+import matplotlib.pyplot as plt
 
 def iterative_deepening_search(RushGame, max_depth=500):
     """
@@ -23,7 +24,7 @@ def iterative_deepening_search(RushGame, max_depth=500):
                 'visited': len(visited),
                 'depth_states': {depth: len(visited)}
             }
-    return {'solutions': [], 'visited': 0, 'depth_states': {}}
+    return {'solutions': [], 'visited': 0, 'depth_states': {}, 'steps': 0}
 
 def depth_limited_search(state, limit, visited, path=()):
     """
