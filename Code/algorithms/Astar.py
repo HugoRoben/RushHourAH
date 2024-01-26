@@ -16,8 +16,16 @@ class Astar:
     def __init__(self, begin_state) -> None:
         self.begin_state = begin_state
         self.vehicles = begin_state.vehicles
+        self.left = False
+
+    def is_red_car_left(self, state):
+        '''Check if the red car has been in the left-halve of the board.'''
+        red_car = self.get_red_car(state)
+        if red_car.x <= 3: self.left = True
+        
 
     def get_red_car(self, state):
+        '''Get the red car from the dictionary of vehicles in a state'''
         for vehicle in state.vehicles:
             if vehicle.id == 'X':
                 red_car = vehicle
@@ -26,6 +34,7 @@ class Astar:
         return None
     
     def is_blocking(self, v, blocker):
+        '''Check if 'blocker' is blocking 'v' '''
 
         if v.orientation == 'H' and blocker.orientation == 'H' and v.y != blocker.y:
             return False
@@ -62,6 +71,7 @@ class Astar:
             return blocker.x == target.x + target.length or blocker.x == target.x - 1
 
     def get_blocking_cars(self, state):
+        '''Get the cars blocking the 'X' car (red car)'''
         red_car = self.get_red_car(state)
         blocking_cars = []
         for v in self.vehicles:
@@ -71,6 +81,8 @@ class Astar:
         return blocking_cars
     
     def blocking_cars_iterative(self, state, max_depth):
+        '''Iteratively find all cars blocking other cars, starting with cars
+        blocking the 'X' car up to the max_depth'''
         already_considered = set()
         current_level_blockers = set(self.get_blocking_cars(state))
         all_blockers = set(current_level_blockers)
@@ -90,6 +102,7 @@ class Astar:
         return all_blockers
 
     def three_long_blockers(self, state):
+        '''Calculate how many of the blocking cars have a length of three'''
         blockers = self.get_blocking_cars(state)
         count = 0
         for v in blockers: 
@@ -97,10 +110,15 @@ class Astar:
         return count 
 
     def heuristic_distance_to_exit(self, state):
+        '''Calculate distance to exit for 'X' car (red car)'''
         red_car = self.get_red_car(state)
         return (state.dim_board - 2 - red_car.x)
     
     def total_heuristic_function(self, state):
+        '''Calculate the sum of all the cost functions for a state.'''
+
+        self.is_red_car_left(state)
+
         length_weight = 1
         distance_weight = 1
 
@@ -109,8 +127,11 @@ class Astar:
         distance_cost = self.heuristic_distance_to_exit(state)
 
         if extra_cost_long_cars >= 1:
-            distance_weight = .5
-            length_weight = 2        
+            # distance_weight = 0
+            length_weight = 2 
+        if not self.left: distance_weight = -2
+        if extra_cost_long_cars >= 1 and self.left:
+            distance_weight = 0
         if extra_cost_long_cars == 0:
             distance_weight = 2
 
@@ -134,14 +155,13 @@ class Astar:
         return path
 
     def astar_search_single_ended(self, initial_state, max_iterations=100000000):
-
+        '''Performs the actual algorithm'''
         solution_path = []
         # calculate heuristic function of the starting state
         open_states = [HeapItem(self.total_heuristic_function(initial_state), initial_state)]
         closed_states = set()
         open_set = {initial_state}
         iterations = 0
-        print(initial_state)
 
         while open_states:
             if iterations >= max_iterations:
@@ -160,7 +180,7 @@ class Astar:
                 return solution_path
 
             closed_states.add(current_state)
-            future_states = self.begin_state.generate_future_states(current_state, depth=2)
+            future_states = self.begin_state.generate_future_states(current_state, depth=1)
             for state in future_states:
                 if state not in closed_states and state not in open_set:
                     heapq.heappush(open_states, HeapItem(self.total_heuristic_function(state), state))
@@ -170,9 +190,7 @@ class Astar:
             #     if move not in closed_states and move not in open_set: 
             #         heapq.heappush(open_states, HeapItem(self.total_heuristic_function(move), move))
             #         open_set.add(move)
-            
-            
-            iterations += 1
 
+            iterations += 1
         print("No solution found")
         return None

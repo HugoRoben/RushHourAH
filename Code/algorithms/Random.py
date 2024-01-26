@@ -12,8 +12,8 @@ def solve_puzzle(Rush_game, max_iterations=1000000):
     move_count = 0
     for _ in range(max_iterations):
         if game.is_solved():
-            visualizer = Visualizer(600, 600) 
-            visualizer.animate_solution(solution_path)
+            # visualizer = Visualizer(600, 600) 
+            # visualizer.animate_solution(solution_path)
             return game, move_count
 
         possible_moves = list(game.moves())
