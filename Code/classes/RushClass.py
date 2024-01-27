@@ -8,11 +8,12 @@ class RushHour(object):
         self.dim_board = dimension
         self.move_count = move_count
         self.parent = parent
+        self._board_cache = None 
 
 
     def __hash__(self):
         return hash(self.__repr__())
-
+    
     def __eq__(self, other):
         if not isinstance(other, RushHour):
             return False
@@ -33,20 +34,17 @@ class RushHour(object):
 
     def get_board(self):
         """Representation of the Rush Hour board as a 2D list of strings"""
-        
-        board = [[' ' for _ in range(self.dim_board)] for _ in range(self.dim_board)]
 
+
+        board = [[' ' for _ in range(self.dim_board)] for _ in range(self.dim_board)]
         for vehicle in self.vehicles:
             x, y = vehicle.x, vehicle.y
             if vehicle.orientation == 'H':
                 for i in range(vehicle.length):
-                    # print(f"Placing vehicle {vehicle.id} at: ({y}, {x+i})")  # Debug print
                     board[y][x+i] = vehicle.id
             else:
                 for i in range(vehicle.length):
-                    # print(f"Placing vehicle {vehicle.id} at: ({y+i}, {x})")  # Debug print
                     board[y+i][x] = vehicle.id
-
         return board
 
 
@@ -60,16 +58,16 @@ class RushHour(object):
                     new_vehicles = self.vehicles.copy()
                     new_vehicles.remove(v)
                     new_vehicles.add(new_v)
-                    # yield RushHour(new_vehicles, self.dim_board)
-                    yield RushHour(new_vehicles, self.dim_board, self.move_count + 1)
+                    yield RushHour(new_vehicles, self.dim_board, parent = self)
+                    # yield RushHour(new_vehicles, self.dim_board, self.move_count + 1)
 
                 if v.x + v.length < self.dim_board and board[v.y][v.x + v.length] == ' ':
                     new_v = Vehicle(v.id, v.orientation, v.x + 1, v.y, v.length)
                     new_vehicles = self.vehicles.copy()
                     new_vehicles.remove(v)
                     new_vehicles.add(new_v)
-                    # yield RushHour(new_vehicles, self.dim_board)
-                    yield RushHour(new_vehicles, self.dim_board, self.move_count + 1)
+                    yield RushHour(new_vehicles, self.dim_board, parent = self)
+                    # yield RushHour(new_vehicles, self.dim_board, self.move_count + 1)
 
             else:
                 if v.y - 1 >= 0 and board[v.y - 1][v.x] == ' ':
@@ -77,21 +75,31 @@ class RushHour(object):
                     new_vehicles = self.vehicles.copy()
                     new_vehicles.remove(v)
                     new_vehicles.add(new_v)
-                    # yield RushHour(new_vehicles, self.dim_board)
-                    yield RushHour(new_vehicles, self.dim_board, self.move_count + 1)
+                    yield RushHour(new_vehicles, self.dim_board, parent = self)
+                    # yield RushHour(new_vehicles, self.dim_board, self.move_count + 1)
 
                 if v.y + v.length < self.dim_board and board[v.y + v.length][v.x] == ' ':
                     new_v = Vehicle(v.id, v.orientation, v.x, v.y + 1, v.length)
                     new_vehicles = self.vehicles.copy()
                     new_vehicles.remove(v)
                     new_vehicles.add(new_v)
-                    # yield RushHour(new_vehicles, self.dim_board)
-                    yield RushHour(new_vehicles, self.dim_board, self.move_count + 1)
+                    yield RushHour(new_vehicles, self.dim_board, parent = self)
+                    # yield RushHour(new_vehicles, self.dim_board, self.move_count + 1)
+    
+    
+    def generate_future_states(self, current_state, depth=3):
+        if depth == 0:
+            return [current_state]
 
-                    
+        future_states = []
+        for next_state in current_state.moves():
+            future_states.extend(self.generate_future_states(next_state, depth - 1))
+
+        return future_states
+    
     def is_solved(self):
         """Check if the puzzle is solved."""
         for vehicle in self.vehicles:
-            if vehicle.id == 'A':
+            if vehicle.id == 'X':
                 return vehicle.x + vehicle.length == self.dim_board
         return False
