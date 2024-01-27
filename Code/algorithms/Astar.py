@@ -122,16 +122,13 @@ class Astar:
         length_weight = 1
         distance_weight = 1
 
-        blocking_cost = len(self.blocking_cars_iterative(state, 3))
+        blocking_cost = len(self.blocking_cars_iterative(state, 4))
         extra_cost_long_cars = self.three_long_blockers(state)
         distance_cost = self.heuristic_distance_to_exit(state)
 
         if extra_cost_long_cars >= 1:
-            # distance_weight = 0
-            length_weight = 2 
-        if not self.left: distance_weight = -2
-        if extra_cost_long_cars >= 1 and self.left:
-            distance_weight = 0
+            distance_weight = -1
+            length_weight = 2        
         if extra_cost_long_cars == 0:
             distance_weight = 2
 

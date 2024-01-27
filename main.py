@@ -45,11 +45,11 @@ def main():
     
 
     elif args.algorithm.lower() == 'iddfs':
-        results = iterative_deepening_search(rush_game, max_depth=500)
+        results = iterative_deepening_search(rush_game, max_depth=100)
         if results['solutions']:
             solution = results['solutions'][0]
             steps = solution_steps(solution)
-            number_steps = len(solution)
+            number_steps = len(steps)
             print(f'Board: {file}:')
             steps_output = ', '.join(f'{step}' for step in steps)
             print(f'Solved in {number_steps} steps: {steps_output}')
