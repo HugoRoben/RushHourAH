@@ -60,12 +60,16 @@ class RushHour(object):
                     new_vehicles.add(new_v)
                     yield RushHour(new_vehicles, self.dim_board, parent = self)
                     # yield RushHour(new_vehicles, self.dim_board, self.move_count + 1)
+                    yield RushHour(new_vehicles, self.dim_board, parent = self)
+                    # yield RushHour(new_vehicles, self.dim_board, self.move_count + 1)
 
                 if v.x + v.length < self.dim_board and board[v.y][v.x + v.length] == ' ':
                     new_v = Vehicle(v.id, v.orientation, v.x + 1, v.y, v.length)
                     new_vehicles = self.vehicles.copy()
                     new_vehicles.remove(v)
                     new_vehicles.add(new_v)
+                    yield RushHour(new_vehicles, self.dim_board, parent = self)
+                    # yield RushHour(new_vehicles, self.dim_board, self.move_count + 1)
                     yield RushHour(new_vehicles, self.dim_board, parent = self)
                     # yield RushHour(new_vehicles, self.dim_board, self.move_count + 1)
 
@@ -75,6 +79,8 @@ class RushHour(object):
                     new_vehicles = self.vehicles.copy()
                     new_vehicles.remove(v)
                     new_vehicles.add(new_v)
+                    yield RushHour(new_vehicles, self.dim_board, parent = self)
+                    # yield RushHour(new_vehicles, self.dim_board, self.move_count + 1)
                     yield RushHour(new_vehicles, self.dim_board, parent = self)
                     # yield RushHour(new_vehicles, self.dim_board, self.move_count + 1)
 

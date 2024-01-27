@@ -84,6 +84,9 @@ def iterative_deepening_search(RushGame, max_depth=500):
     states_per_depth = {}
     solution = None
 
+    states_per_depth = {}
+    solution = None
+
     for depth in range(1, max_depth + 1):
         visited_states = set()
         visit_queue = deque([(RushGame, ())])
