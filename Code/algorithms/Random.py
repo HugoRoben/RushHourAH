@@ -1,31 +1,35 @@
 import random
-from Code.classes.RushClass import RushHour
 from Code.visual.visualizer import *
-# import time
-# import matplotlib.pyplot as plt
-# import seaborn as sns
-# import pandas as pd
 
 
-def solve_puzzle(Rush_game, max_iterations=1000000):
+def random_solve_puzzle(Rush_game, max_iterations=1000000):
+    """
+    Attempt to solve the Rush Hour puzzle using a random approach.
+
+    Args:
+    Rush_game (RushGame): An instance of the Rush Hour puzzle game.
+    max_iterations (int): Maximum number of iterations to attempt for finding a solution.
+
+    Returns:
+    Optional[Dict[str, any]]: A dictionary containing the final game state and the solution path if solved, 
+    otherwise None if no solution is found within the maximum iterations.
+    """
+    
     game = Rush_game
-    move_count = 0
+    solution_path = [game]
+
     for _ in range(max_iterations):
         if game.is_solved():
-            # visualizer = Visualizer(600, 600) 
+            # visualizer = Visualizer(600, 600)
             # visualizer.animate_solution(solution_path)
-            return game, move_count
+            return {'game': game, 'solution': solution_path}
 
         possible_moves = list(game.moves())
         if not possible_moves:
-            return None
-        next_state = random.choice(possible_moves)
-        
-        if next_state is None:  # or hash(next_state) in self.visited_states
-            print("No more moves available or state repeated.")
             break
-        
-        # self.visited_states.add(hash(next_state))
-        move_count += 1
-        game = next_state  # Update the game state
-    return 0
+
+        game = random.choice(possible_moves)
+        solution_path.append(game)
+
+    return None
+

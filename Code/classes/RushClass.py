@@ -29,7 +29,7 @@ class RushHour(object):
     
     def __hash__(self):
         return hash(self.__repr__())
-
+    
     def __eq__(self, other):
         if not isinstance(other, RushHour):
             return False

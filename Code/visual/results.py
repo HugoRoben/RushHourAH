@@ -2,84 +2,94 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def visualize(steps, times, algo, save_to_file=True):
-    if not times or not steps:
-        print("No data for visualization available.")
+def visualize(stats, algo, save_to_file=False):
+    times = stats['times']
+    steps = stats['steps']
+
+
+    if len(times) <= 1:
+        print("\nNot enough data for visualization.")
         return
 
-    num_bins = 50000
-    title_name = algo
-    file_name = f'data/{title_name}.png'
+    fig, axs = plt.subplots(1, 2, figsize=(15, 7))
 
-    # Set up the figure and axes
-    fig, axs = plt.subplots(1, 2, figsize=(12, 6))
 
-    # Histogram for time
-    axs[0].hist(times, bins=num_bins, color='tab:blue', edgecolor='black')
-    axs[0].set_title(f'{title_name}: Time Taken (s)')
-    axs[0].set_xlabel('Time')
+    log_times = np.log1p(times)
+    num_bins_time = min(500, len(np.unique(log_times)))
+    axs[0].hist(log_times, bins=num_bins_time, color='tab:blue', edgecolor='black')
+    axs[0].set_title(f'{algo}: Time Taken (s)')
+    axs[0].set_xlabel('Time (s)')
     axs[0].set_ylabel('Frequency')
 
     # Histogram for steps
-    axs[1].hist(steps, bins=num_bins, color='tab:red', edgecolor='black')
-    axs[1].set_title(f'{title_name}: Number of Steps')
+    num_bins_steps = min(500, len(np.unique(steps)))
+    axs[1].hist(steps, bins=num_bins_steps, color='tab:red', edgecolor='black')
+    axs[1].set_title(f'{algo}: Number of Steps')
     axs[1].set_xlabel('Steps')
+    axs[1].set_ylabel('Frequency')
 
-    # Add some spacing between the histograms
-    plt.subplots_adjust(wspace=0.3)
-
-    # Global title
-    plt.suptitle(f'{title_name} - Comparison of Time Taken and Number of Steps')
-
+    plt.subplots_adjust(wspace=0.4)
+    plt.suptitle(f'{algo} - Time Taken and Number of Steps', fontsize=16)
 
     if save_to_file:
+        file_name = f'data/{algo}_test.png'
         plt.savefig(file_name)
         plt.close()
         print(f"Plot saved as {file_name}")
-    else:
-        plt.show()
+    # else:
+    #     plt.show()
 
 
-def desc_stats(steps, times, unsolved_count, algo, save_to_file=True):
-    file_name = f'data/{algo}.txt'
-    
-    total_times = sum(times)
-    total_steps = sum(steps)
-    
-    solved = len(times)
-    unsolved = unsolved_count
-    total = solved + unsolved
-
-    def format_stat(value):
+def format_stat(value):
         if isinstance(value, float):
             return f"{value:.3f}"
         return str(value)
 
-    # Puzzle statistics
-    stats_puzzle = f"\nPuzzle Statistics:\n{'-' * 25}\n"
-    stats_puzzle += f"Total Puzzles  : {total}\n"
-    stats_puzzle += f"Solved         : {solved}\n"
-    stats_puzzle += f"Unsolved       : {unsolved}\n\n"
 
-    # Time statistics
-    stats_time = f"\nTime Statistics:\n{'-' * 25}\n"
-    stats_time += f"Total Time     : {format_stat(total_times)}\n"
-    stats_time += f"Mean           : {format_stat(np.mean(times))}\n"
-    stats_time += f"Min            : {format_stat(np.min(times))}\n"
-    stats_time += f"Max            : {format_stat(np.max(times))}\n\n"
+def desc_stats(stats, unsolved_count, algo, save_to_file=False):
+    times = stats['times']
+    steps = stats['steps']
+    total_games = len(times)
+    output = ""
 
-    # Steps statistics
-    stats_steps = f"\nSteps Statistics:\n{'-' * 25}\n"
-    stats_steps += f"Total Steps    : {format_stat(total_steps)}\n"
-    stats_steps += f"Mean           : {format_stat(np.mean(steps))}\n"
-    stats_steps += f"Min            : {format_stat(np.min(steps))}\n"
-    stats_steps += f"Max            : {format_stat(np.max(steps))}\n"
+    if total_games > 1:
+        total_times = sum(times)
+        total_steps = sum(steps)
+        solved = len(times)
 
-    # Combine all statistics
-    output = stats_puzzle + stats_time + stats_steps
+        # Puzzle statistics
+        output += f"\nPuzzle Statistics:\n{'-' * 25}\n"
+        output += f"Total Puzzles  : {total_games}\n"
+        output += f"Solved         : {solved}\n"
+        output += f"Unsolved       : {unsolved_count}\n\n"
+
+        # Time statistics
+        output += f"\nTime Statistics:\n{'-' * 25}\n"
+        output += f"Total Time     : {format_stat(total_times)}\n"
+        output += f"Mean           : {format_stat(np.mean(times))}\n"
+        output += f"Min            : {format_stat(np.min(times))}\n"
+        output += f"Max            : {format_stat(np.max(times))}\n\n"
+
+        # Steps statistics
+        output += f"\nSteps Statistics:\n{'-' * 25}\n"
+        output += f"Total Steps    : {format_stat(total_steps)}\n"
+        output += f"Mean           : {format_stat(np.mean(steps))}\n"
+        output += f"Min            : {format_stat(np.min(steps))}\n"
+        output += f"Max            : {format_stat(np.max(steps))}\n"
+
+    # When only one game is played
+    else:
+        solved_status = "Solved" if len(times) == 1 else "Unsolved"
+        output += f"\nGame Statistics ({algo}):\n{'-' * 25}\n"
+        output += f"Status         : {solved_status}\n"
+        output += f"Time Taken (s) : {format_stat(times[0]) if times else 'N/A'}\n"
+        output += f"Number of Steps: {format_stat(steps[0]) if steps else 'N/A'}\n"
+
     print(output)
 
-    # Save to text file if required
     if save_to_file:
+        file_name = f'data/{algo}_stats.txt'
         with open(file_name, 'w') as file:
             file.write(output)
+        print(f"Statistics saved as {file_name}")
+
