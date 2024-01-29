@@ -6,6 +6,7 @@ after each other to see the path taken for the solution.
 
 import pygame
 import random
+from ..Classes.RushClass import RushHour
 
 def random_color():
     """ Generates a random colour for the vehicles"""
@@ -13,20 +14,20 @@ def random_color():
     return (random.randint(0, 200), random.randint(0, 255), random.randint(0, 255))
 
 class Visualizer:
-    def __init__(self, width, height):
+    def __init__(self, width: int, height: int):
         # Initialise the game
         pygame.init()
         self.screen = pygame.display.set_mode((width, height))
         self.clock = pygame.time.Clock()
         self.color_map = {}
 
-    def get_vehicle_color(self, car_id):
+    def get_vehicle_color(self, car_id: str):
         """ Check if car already has a colour assigned, if not call random_color"""
         if car_id not in self.color_map:
             self.color_map[car_id] = random_color()
         return self.color_map[car_id]
 
-    def draw(self, rush_hour_state):
+    def draw(self, rush_hour_state: RushHour):
         """ Draws the board on screen given the configuration of the vehicles"""
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -62,7 +63,7 @@ class Visualizer:
         # run the game at 60fps
         self.clock.tick(60)
 
-    def animate_solution(self, solution_path, frame_delay=100):
+    def animate_solution(self, solution_path: list, frame_delay: int =100):
         """
         Animate the sequence of states as a solution path.
         """

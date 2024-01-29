@@ -3,13 +3,12 @@ Class representing a game of rush hour. The class includes a 2D representation
 of the board in a state, generates all possible moves in a state, and checks
 if a game is won.
 '''
-
 from Code.classes.VehicleClass import Vehicle
 
 class RushHour(object):
     """A configuration of a single Rush Hour board."""
 
-    def __init__(self, vehicles, dimension, parent = None, occupied_coords = None):
+    def __init__(self, vehicles: set, dimension: int, parent: 'RushHour' = None, occupied_coords: set = None):
         self.vehicles = vehicles
         self.dim_board = dimension
         self.parent = parent
@@ -30,12 +29,12 @@ class RushHour(object):
     def __hash__(self):
         return hash(self.__repr__())
     
-    def __eq__(self, other):
+    def __eq__(self, other: 'RushHour'):
         if not isinstance(other, RushHour):
             return False
         return self.vehicles == other.vehicles and self.dim_board == other.dim_board
 
-    def __ne__(self, other):
+    def __ne__(self, other: 'RushHour'):
         return not self.__eq__(other)
 
 
@@ -64,50 +63,57 @@ class RushHour(object):
             # horziontal moves
             if v.orientation == 'H':
                 # check if tile next to vehicle is free
-                if v.x - 1 >= 0 and (v.x - 1, v.y) not in self.occupied_coords:
+                if self.is_valid_move(v, 'left'):
+                    # create new vehicle with new coordinates
                     new_v = Vehicle(v.id, v.orientation, v.x - 1, v.y, v.length)
-                    # copy vehicles, remove old vehicle and add vehicle with new coordinates
-                    new_vehicles = self.vehicles.copy()
-                    new_vehicles.remove(v)
-                    new_vehicles.add(new_v)
-                    # copy set with coordinates, remove old coordinate add new coordinate after move
-                    new_occupied_coords = self.occupied_coords.copy()
-                    new_occupied_coords.remove((v.x + v.length - 1, v.y))
-                    new_occupied_coords.add((v.x - 1, v.y))
-                    # yield new rush hour game
-                    yield RushHour(new_vehicles, self.dim_board, parent = self, occupied_coords = new_occupied_coords)
-                if v.x + v.length < self.dim_board and (v.x + v.length, v.y) not in self.occupied_coords:
+                    new_coords = (v.x - 1, v.y)
+                    # yield the new state of the game with updated vehicle position
+                    yield from self.perform_move(v, new_v, (v.x + v.length - 1, v.y), new_coords)
+                if self.is_valid_move(v, 'right'):
                     new_v = Vehicle(v.id, v.orientation, v.x + 1, v.y, v.length)
-                    new_vehicles = self.vehicles.copy()
-                    new_vehicles.remove(v)
-                    new_vehicles.add(new_v)
-                    new_occupied_coords = self.occupied_coords.copy()
-                    new_occupied_coords.remove((v.x, v.y))
-                    new_occupied_coords.add((v.x + v.length, v.y))
-                    yield RushHour(new_vehicles, self.dim_board, parent=self, occupied_coords=new_occupied_coords)
-                    
+                    new_coords = (v.x + v.length, v.y)
+                    yield from self.perform_move(v, new_v, (v.x, v.y), new_coords)
             # vertical moves
             else: 
-                if v.y - 1 >= 0 and (v.x, v.y - 1) not in self.occupied_coords:
+                if self.is_valid_move(v, 'down'):
                     new_v = Vehicle(v.id, v.orientation, v.x, v.y - 1, v.length)
-                    new_vehicles = self.vehicles.copy()
-                    new_vehicles.remove(v)
-                    new_vehicles.add(new_v)
-                    new_occupied_coords = self.occupied_coords.copy()
-                    new_occupied_coords.remove((v.x, v.y + v.length - 1))
-                    new_occupied_coords.add((v.x, v.y - 1))
-                    yield RushHour(new_vehicles, self.dim_board, parent=self, occupied_coords=new_occupied_coords)
-                if v.y + v.length < self.dim_board and (v.x, v.y + v.length) not in self.occupied_coords:
+                    new_coords = (v.x, v.y - 1)
+                    yield from self.perform_move(v, new_v, (v.x, v.y + v.length - 1), new_coords)
+                if self.is_valid_move(v, 'up'):
                     new_v = Vehicle(v.id, v.orientation, v.x, v.y + 1, v.length)
-                    new_vehicles = self.vehicles.copy()
-                    new_vehicles.remove(v)
-                    new_vehicles.add(new_v)
-                    new_occupied_coords = self.occupied_coords.copy()
-                    new_occupied_coords.remove((v.x, v.y))
-                    new_occupied_coords.add((v.x, v.y + v.length))
-                    yield RushHour(new_vehicles, self.dim_board, parent=self, occupied_coords=new_occupied_coords)
+                    new_coords = (v.x, v.y + v.length)
+                    yield from self.perform_move(v, new_v, (v.x, v.y), new_coords)
+    
+    def is_valid_move(self, v: Vehicle, direction: str):
+        '''Checks if move is valid given Vehicle and direction'''
+        # check horizontal moves
+        if v.orientation == 'H':
+            if direction == 'left':
+                return v.x - 1 >= 0 and (v.x - 1, v.y) not in self.occupied_coords
+            if direction == 'right':
+                return v.x + v.length < self.dim_board and (v.x + v.length, v.y) not in self.occupied_coords
+        # check vertical moves
+        if v.orientation == 'V':
+            if direction == 'up':
+                return v.y + v.length < self.dim_board and (v.x, v.y + v.length) not in self.occupied_coords
+            if direction == 'down':
+                return v.y - 1 >= 0 and (v.x, v.y - 1) not in self.occupied_coords
 
-    def generate_future_states(self, current_state, depth=3):
+    def perform_move(self, v: Vehicle, new_v: Vehicle, old_coords: tuple, new_coords: tuple):
+        '''Performs moves by yielding new states of the game'''
+        # copy existing vehicles set
+        new_vehicles = self.vehicles.copy()
+        # remove vehicle to be moved and add back with updated coordinates
+        new_vehicles.remove(v)
+        new_vehicles.add(new_v)
+        # copy and update the set of te occupied coordinates
+        new_occupied_coords = self.occupied_coords.copy()
+        new_occupied_coords.remove(old_coords)
+        new_occupied_coords.add(new_coords)
+        # yield the new state
+        yield RushHour(new_vehicles, self.dim_board, parent=self, occupied_coords=new_occupied_coords)
+
+    def generate_future_states(self, current_state: 'RushHour', depth=3):
         '''Allows to look a specified amount of states ahead from a certain state'''
         # if depth is 0, no look ahead is required
         if depth == 0:

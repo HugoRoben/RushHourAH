@@ -2,7 +2,7 @@ from collections import deque
 from .Astar import *
 
 
-def breadth_first_search(RushGame, max_depth=100):
+def breadth_first_search(RushGame: RushHour, max_depth=100):
     """
     Perform a breadth-first search to solve the Rush Hour puzzle.
 

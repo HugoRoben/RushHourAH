@@ -1,13 +1,14 @@
 from Code.visual.visualizer import *
+from ..Classes.RushClass import RushHour
 
-def reconstruct_path(board):
+def reconstruct_path(board: RushHour):
     path = []
     while board:
         path.append(board)
         board = board.parent
     return path[::-1]
 
-def depth_First_Search(RushGame, max_depth=500):
+def depth_First_Search(RushGame: RushHour, max_depth: int=500):
     Stack = [RushGame]
     number_of_nodes = 0
     archive = {RushGame}

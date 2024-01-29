@@ -14,23 +14,23 @@ class HeapItem:
     In case the heuristic cost of states is equal, less than
     is defined as the lowest priority number
     '''
-    def __init__(self, priority, rush_hour_obj):
+    def __init__(self, priority: int, rush_hour_obj: RushHour):
         self.priority = priority
         self.rush_hour_obj = rush_hour_obj
 
-    def __lt__(self, other):
+    def __lt__(self, other: 'HeapItem'):
         return self.priority < other.priority
 
 class Astar:
     '''
     Class performing the A* algorithm
     '''
-    def __init__(self, begin_state) -> None:
+    def __init__(self, begin_state: RushHour) -> None:
         self.begin_state = begin_state
         self.vehicles = begin_state.vehicles
         self.left = False
 
-    def is_red_car_left(self, state):
+    def is_red_car_left(self, state: RushHour):
         '''
         Check if the red car has been in the left-halve of the board.
         '''
@@ -38,7 +38,7 @@ class Astar:
         if red_car.x <= 3: self.left = True
         
 
-    def get_red_car(self, state):
+    def get_red_car(self, state: RushHour):
         '''
         Get the red car from the dictionary of vehicles in a state
         '''
@@ -49,7 +49,7 @@ class Astar:
         # return None if red car not found
         return None
     
-    def is_blocking(self, v, blocker):
+    def is_blocking(self, v: Vehicle, blocker: Vehicle):
         '''
         Check if 'blocker' is blocking 'v'
         '''
@@ -68,7 +68,7 @@ class Astar:
         if blocker.orientation == 'V':
             return self.is_vertically_blocking(blocker, v)
 
-    def is_horizontally_blocking(self, blocker, target):
+    def is_horizontally_blocking(self, blocker: Vehicle, target: Vehicle):
         """
         Check if a horizontally oriented 'vehicle' is blocking 'target'.
         """
@@ -79,7 +79,7 @@ class Astar:
             if blocker.y == target.y + target.length or blocker.y == target.y - 1:
                 return any(target.x == pos for pos in range(blocker.x, blocker_end))
 
-    def is_vertically_blocking(self, blocker, target):
+    def is_vertically_blocking(self, blocker: Vehicle, target: Vehicle):
         """
         Check if a vertically oriented 'vehicle' is blocking 'target'.
         """
@@ -89,7 +89,7 @@ class Astar:
         if target.orientation == 'H':
             return blocker.x == target.x + target.length or blocker.x == target.x - 1
 
-    def get_blocking_cars(self, state):
+    def get_blocking_cars(self, state: RushHour):
         '''
         Get the cars blocking the 'X' car (red car)
         '''
@@ -104,7 +104,7 @@ class Astar:
                     blocking_cars.append(v)
         return blocking_cars
     
-    def blocking_cars_iterative(self, state, max_depth):
+    def blocking_cars_iterative(self, state: RushHour, max_depth: int):
         '''
         Iteratively find all cars blocking other cars, starting with cars
         blocking the 'X' car up to the max_depth
@@ -131,7 +131,7 @@ class Astar:
             all_blockers.update(current_level_blockers)
         return all_blockers
 
-    def three_long_blockers(self, state):
+    def three_long_blockers(self, state: RushHour):
         '''
         Calculate how many of the cars blocking the red car directly
         have a length of three
@@ -142,14 +142,14 @@ class Astar:
             if v.length == 3: count +=1
         return count 
 
-    def heuristic_distance_to_exit(self, state):
+    def heuristic_distance_to_exit(self, state: RushHour):
         '''
         Calculate distance to exit for 'X' car (red car)
         '''
         red_car = self.get_red_car(state)
         return (state.dim_board - 2 - red_car.x)
     
-    def total_heuristic_function(self, state):
+    def total_heuristic_function(self, state: RushHour):
         '''
         Calculate the sum of all the cost functions for a state.
         '''
@@ -175,14 +175,14 @@ class Astar:
 
         return blocking_cost + distance_cost * distance_weight + extra_cost_long_cars * length_weight
 
-    def is_winning_state(self, state):
+    def is_winning_state(self, state: RushHour):
         """
         Check if the 'X' vehicle (red car) can exit the board.
         """
         # if no more blocking cars, game is won
         return len(self.get_blocking_cars(state)) == 0
     
-    def reconstruct_path(self, end_state):
+    def reconstruct_path(self, end_state: RushHour):
         """
         Reconstruct the solution path from the end state.
         """
@@ -198,7 +198,7 @@ class Astar:
             current_state = current_state.parent
         return path
     
-    def is_solvable(self, state):
+    def is_solvable(self, state: RushHour):
         '''
         checks if there is only one blocking car left which can be moved to solve the board
         '''
@@ -230,7 +230,7 @@ class Astar:
                         for cell in last_column[blocker.y:state.dim_board]
                     )
             
-    def astar_search_single_ended(self, initial_state, max_iterations=100000000):
+    def astar_search_single_ended(self, initial_state: RushHour, max_iterations: int=100000000):
         '''
         Performs A* search algorithm
         '''

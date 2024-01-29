@@ -235,7 +235,7 @@ def solve_rush_hour_games(rush_games, algorithm, repeat):
                 unsolved_count += unsolved
                 # if solution:
                 #     solutions.append(solution)
-                game_count += 1  # Increment the counter
+                game_count += 1
                 progress_bar.update(1)
                 progress_bar.set_description(f"Processed {game_count} games")
 
