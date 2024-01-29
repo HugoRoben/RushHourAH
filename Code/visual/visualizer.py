@@ -6,7 +6,7 @@ after each other to see the path taken for the solution.
 
 import pygame
 import random
-from ..Classes.RushClass import RushHour
+from ..classes.RushClass import RushHour
 
 def random_color():
     """ Generates a random colour for the vehicles"""

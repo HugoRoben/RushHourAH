@@ -1,5 +1,5 @@
 from Code.visual.visualizer import *
-from ..Classes.RushClass import RushHour
+from ..classes.RushClass import RushHour
 
 def reconstruct_path(board: RushHour):
     path = []

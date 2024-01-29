@@ -1,6 +1,6 @@
 import random
 from Code.visual.visualizer import *
-from ..Classes.RushClass import RushHour
+from ..classes.RushClass import RushHour
 
 
 def random_solve_puzzle(Rush_game: RushHour, max_iterations: int=1000000):

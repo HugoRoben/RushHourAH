@@ -1,6 +1,5 @@
 from collections import deque
-from .Astar import *
-
+from ..classes.RushClass import RushHour
 
 def breadth_first_search(RushGame: RushHour, max_depth=100):
     """
