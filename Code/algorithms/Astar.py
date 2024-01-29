@@ -295,7 +295,7 @@ class Astar:
             current_state = current_state.parent
         return path
             
-    def astar_search_single_ended(self, initial_state: RushHour,\
+    def astar_search(self, initial_state: RushHour,\
                     max_iterations: int=100000000) -> Optional[List[RushHour]]:
         """
         Performs A* search algorithm to solve the Rush Hour game.

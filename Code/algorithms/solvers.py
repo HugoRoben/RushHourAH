@@ -178,7 +178,7 @@ def solve_game(rush_game, algorithm, max_depth=1000, max_iterations=1000000):
     results = None
 
     if algorithm.lower() == 'astar':
-        results = Astar(rush_game).astar_search_single_ended(rush_game)
+        results = Astar(rush_game).astar_search(rush_game)
     elif algorithm.lower() == 'iddfs':
         results = iterative_deepening_search(rush_game, max_depth)
     elif algorithm.lower() == 'bfs':
