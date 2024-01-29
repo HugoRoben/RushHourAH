@@ -4,6 +4,7 @@ of the board in a state, generates all possible moves in a state, and checks
 if a game is won.
 '''
 from Code.classes.VehicleClass import Vehicle
+from typing import Tuple, Set, Optional, List
 
 class RushHour(object):
     """A configuration of a single Rush Hour board."""
@@ -18,13 +19,14 @@ class RushHour(object):
         else: 
             self.occupied_coords = occupied_coords
 
-    def get_occupied_coords_set(self):
-        '''Adds tuples: (x,y) for the occupied coordinates in the begin state of the game'''
-        coords = set()
-        for v in self.vehicles:
-            for i in range(v.length):
-                coords.add((v.x + i, v.y) if v.orientation == 'H' else (v.x, v.y + i))
-        return coords
+    def get_vehicle_coords(self, vehicle: Vehicle) -> Tuple[str, str]:
+        return {(vehicle.x + i, vehicle.y) if vehicle.orientation == 'H'\
+                else (vehicle.x, vehicle.y + i) 
+            for i in range(vehicle.length)}
+
+    def get_occupied_coords_set(self) -> Set[Tuple]:
+        return set().union(*map(self.get_vehicle_coords, self.vehicles))
+    
     
     def __hash__(self):
         return hash(self.__repr__())
@@ -56,6 +58,42 @@ class RushHour(object):
                 coord = (vehicle.x + i, vehicle.y) if vehicle.orientation == 'H' else (vehicle.x, vehicle.y + i)
                 board[coord[1]][coord[0]] = vehicle.id
         return board
+    
+    def get_red_car(self) -> Optional[Vehicle]:
+        """
+        Get the red car from the dictionary of vehicles in a state.
+
+        Returns:
+        -----------------------------------------------------------------------
+            Optional[Vehicle]: The red car Vehicle object if found,
+            None otherwise.
+        """
+        for vehicle in self.vehicles:
+            if vehicle.id == 'X':
+                red_car = vehicle
+                return red_car
+        # return None if red car not found
+        return None
+    
+    def get_cars_blocking_red(self) -> List[Vehicle]:
+        """
+        Get the cars blocking the 'X' car (red car).
+
+        Returns:
+        -----------------------------------------------------------------------
+            List[Vehicle]: A list of vehicles that are blocking the red car.
+        """
+        # get teh red car
+        red_car = self.get_red_car()
+        blocking_cars = []
+        # iterate through vehicle set and add blocking vehicles to the list
+        for v in self.vehicles:
+            # horizontal cars can not block the red car
+            if v.x > red_car.x + 1 and v.orientation == 'V':
+                if v.y == red_car.y - 1 or v.y == red_car.y or\
+                        (v.y == red_car.y - 2 and v.length == 3):
+                    blocking_cars.append(v)
+        return blocking_cars
 
     def moves(self):
         """Return iterator of next possible moves."""
@@ -133,3 +171,42 @@ class RushHour(object):
                 return vehicle.x + vehicle.length == self.dim_board
         return False
     
+    def is_solvable(self) -> bool:
+        """
+        Checks if there is only one blocking car left which can be moved to
+        solve the board. The function checks if in the last column of the board
+        there is only one car, of length 3, left which can be moved far enough
+        up or down to free the path to the exit.
+
+        Returns:
+        -----------------------------------------------------------------------
+            bool: True if the game is solvable, False otherwise.
+        """
+        blocking_cars = self.get_cars_blocking_red()
+        # if more than one blocker, return False
+        if len(blocking_cars) > 1 or blocking_cars[0].length != 3: return False
+
+        last_col = [row[-1] for row in self.get_board()]
+        blocker = blocking_cars[0]
+        # for 9x9 boards
+        if self.dim_board == 9 and blocking_cars[0].x == 8:
+            # check if the blocking car is in a position it can move
+            # out of the free the exit
+            # without having to move other vehicles
+            return (
+            all(ID == ' ' or (ID == blocker.id) for ID in last_col[0:6]) or\
+            all(ID == ' ' or (ID == blocker.id) for ID in last_col[2:8]) or\
+            all(ID == ' ' or (ID == blocker.id) for ID in last_col[1:6]) or\
+            all(ID == ' ' or (ID == blocker.id) for ID in last_col[3:8]) or\
+            all(ID == ' ' or (ID == blocker.id) for ID in last_col[1:7]) or\
+            all(ID == ' ' or (ID == blocker.id) for ID in last_col[4:8])
+                )  
+        # for 6x6 boards
+        if self.dim_board == 6 and blocking_cars[0].x == 5:
+                # check if the blocking car is in a position it can move
+                # out of the free the exit
+                # without having to move other vehicles
+                return all(
+                    cell == ' ' or (cell == blocker.id) 
+                    for cell in last_col[blocker.y:self.dim_board]
+                )

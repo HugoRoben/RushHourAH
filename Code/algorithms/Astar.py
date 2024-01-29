@@ -76,50 +76,6 @@ class Astar:
         self.begin_state = begin_state
         self.vehicles = begin_state.vehicles
 
-    def get_red_car(self, state: RushHour) -> Optional[Vehicle]:
-        """
-        Get the red car from the dictionary of vehicles in a state.
-
-        Args:
-        -----------------------------------------------------------------------
-            state (RushHour): The Rush Hour game state.
-
-        Returns:
-        -----------------------------------------------------------------------
-            Optional[Vehicle]: The red car Vehicle object if found,
-            None otherwise.
-        """
-        for vehicle in state.vehicles:
-            if vehicle.id == 'X':
-                red_car = vehicle
-                return red_car
-        # return None if red car not found
-        return None
-
-    def get_cars_blocking_red(self, state: RushHour) -> List[Vehicle]:
-        """
-        Get the cars blocking the 'X' car (red car).
-
-        Args:
-        -----------------------------------------------------------------------
-            state (RushHour): The Rush Hour game state.
-
-        Returns:
-        -----------------------------------------------------------------------
-            List[Vehicle]: A list of vehicles that are blocking the red car.
-        """
-        # get teh red car
-        red_car = self.get_red_car(state)
-        blocking_cars = []
-        # iterate through vehicle set and add blocking vehicles to the list
-        for v in state.vehicles:
-            # horizontal cars can not block the red car
-            if v.x > red_car.x + 1 and v.orientation == 'V':
-                if v.y == red_car.y - 1 or v.y == red_car.y or\
-                        (v.y == red_car.y - 2 and v.length == 3):
-                    blocking_cars.append(v)
-        return blocking_cars
-    
     def blocking_cars_iterative(self, state: RushHour, max_depth: int)\
                                                         -> Set[Vehicle]:
         """
@@ -138,7 +94,7 @@ class Astar:
         # keep track of the vheicles already considered as blockers
         already_considered = set()
         # start with the cars directly blocking the red car as current blockers
-        current_level_blockers = set(self.get_cars_blocking_red(state))
+        current_level_blockers = set(state.get_cars_blocking_red())
 
         all_blockers = set(current_level_blockers)
         already_considered.update(current_level_blockers)
@@ -249,7 +205,7 @@ class Astar:
         -----------------------------------------------------------------------
             int: The count of blocking cars with a length of three.
         """
-        blockers = self.get_cars_blocking_red(state)
+        blockers = state.get_cars_blocking_red()
         count = 0
         for v in blockers: 
             if v.length == 3: count +=1
@@ -267,10 +223,10 @@ class Astar:
         -----------------------------------------------------------------------
             int: The Manhattan distance to the exit.
         """
-        red_car = self.get_red_car(state)
+        red_car = state.get_red_car()
         return (state.dim_board - 2 - red_car.x)
     
-    def total_heuristic_function(self, state: RushHour) -> int:
+    def total_cost_function(self, state: RushHour) -> int:
         """
         Calculate the sum of all the cost functions for a state.
 
@@ -313,7 +269,7 @@ class Astar:
             bool: True if the game is won, False otherwise.
         """
         # if no more blocking cars, game is won
-        return len(self.get_cars_blocking_red(state)) == 0
+        return len(state.get_cars_blocking_red()) == 0
     
     def reconstruct_path(self, end_state: RushHour) -> List[RushHour]:
         """
@@ -338,51 +294,6 @@ class Astar:
             # update current state to its' parent state
             current_state = current_state.parent
         return path
-    
-    def is_solvable(self, state: RushHour) -> bool:
-        """
-        Checks if there is only one blocking car left which can be moved to
-        solve the board. The function checks if in the last column of the board
-        there is only one car, of length 3, left which can be moved far enough
-        up or down to free the path to the exit.
-
-        Args:
-        -----------------------------------------------------------------------
-            state (RushHour): The Rush Hour game state.
-
-        Returns:
-        -----------------------------------------------------------------------
-            bool: True if the game is solvable, False otherwise.
-        """
-        last_col = [row[-1] for row in state.get_board()]
-        blocking_cars = self.get_cars_blocking_red(state)
-        blocker = blocking_cars[0]
-        # check if only one car is blocking the red car
-        if len(blocking_cars) == 1:
-            # for 9x9 boards
-            if state.dim_board == 9 and blocking_cars[0].x == 8 and\
-                                                    blocker.length == 3:
-                # check if the blocking car is in a position it can move
-                # out of the free the exit
-                # without having to move other vehicles
-                return (
-                all(ID == ' ' or (ID == blocker.id) for ID in last_col[0:6]) or\
-                all(ID == ' ' or (ID == blocker.id) for ID in last_col[2:8]) or\
-                all(ID == ' ' or (ID == blocker.id) for ID in last_col[1:6]) or\
-                all(ID == ' ' or (ID == blocker.id) for ID in last_col[3:8]) or\
-                all(ID == ' ' or (ID == blocker.id) for ID in last_col[1:7]) or\
-                all(ID == ' ' or (ID == blocker.id) for ID in last_col[4:8])
-                    )  
-            # for 6x6 boards
-            if state.dim_board == 6 and blocking_cars[0].x == 5 and\
-                                                    blocker.length == 3:
-                    # check if the blocking car is in a position it can move
-                    # out of the free the exit
-                    # without having to move other vehicles
-                    return all(
-                        cell == ' ' or (cell == blocker.id) 
-                        for cell in last_col[blocker.y:state.dim_board]
-                    )
             
     def astar_search_single_ended(self, initial_state: RushHour,\
                     max_iterations: int=100000000) -> Optional[List[RushHour]]:
@@ -402,7 +313,7 @@ class Astar:
         """
         solution_path = []
         # calculate heuristic function of the starting state
-        open_states = [HeapItem(self.total_heuristic_function(initial_state),\
+        open_states = [HeapItem(self.total_cost_function(initial_state),\
                                 initial_state)]
         # keep track of visited states in a set
         closed_states = set()
@@ -420,7 +331,7 @@ class Astar:
             # check if the game is won or the game is in a state where it is
             # directly solvable
             if self.is_winning_state(current_state) or\
-                            self.is_solvable(current_state):
+                            current_state.is_solvable():
                 # reconstruct the path taken for the solution
                 solution_path = self.reconstruct_path(current_state)
                 # return the path
@@ -436,7 +347,7 @@ class Astar:
 
             for state in future_states:
                 # if a state is a winning state, break and return path
-                if self.is_winning_state(state) or self.is_solvable(state):
+                if self.is_winning_state(state) or state.is_solvable():
                     solution_path = self.reconstruct_path(state)
                     return {'solution': solution_path}
                 
@@ -444,7 +355,7 @@ class Astar:
                 if state not in closed_states and state not in open_set:
                     # calculate cost of the state and add to the list
                     heapq.heappush(open_states,\
-                        HeapItem(self.total_heuristic_function(state), state))
+                        HeapItem(self.total_cost_function(state), state))
                     open_set.add(state)
                     
             iterations += 1
