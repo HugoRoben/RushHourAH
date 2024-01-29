@@ -4,22 +4,26 @@ cost of cars blocking the red car, the length of the cars
 blocking the red car and the distance of the red car to the exit.
 '''
 
-from ..classes.RushClass import *
+from ..classes.RushClass import RushHour
+from ..classes.VehicleClass import Vehicle
 import heapq
 from typing import Optional, List, Set
 
 class HeapItem:
     """
-    Represents an item in the heap used in the A* search algorithm, with a priority for sorting.
+    Represents an item in the heap used in the A* search algorithm, with a
+    priority for sorting.
 
     Attributes:
-    ---------------
+    ---------------------------------------------------------------------------
         priority (int): The priority of this item in the heap.
-        rush_hour_obj (RushHour): The Rush-Hour game state associated with this heap item.
+        rush_hour_obj (RushHour): The Rush-Hour game state associated with this
+        heap item.
 
     Methods:
-    ---------------
-        __lt__: Defines the less-than comparison between two HeapItem objects based on priority.
+    ---------------------------------------------------------------------------
+        __lt__: Defines the less-than comparison between two HeapItem objects
+                based on priority.
     """
     def __init__(self, priority: int, rush_hour_obj: RushHour):
         self.priority = priority
@@ -193,7 +197,8 @@ class Astar:
 
         Args:
         -----------------------------------------------------------------------
-            blocker (Vehicle): The potentially blocking horizontally oriented Vehicle.
+            blocker (Vehicle): The potentially blocking horizontally oriented
+            Vehicle.
             target (Vehicle): The target Vehicle.
 
         Returns:
@@ -337,7 +342,9 @@ class Astar:
     def is_solvable(self, state: RushHour) -> bool:
         """
         Checks if there is only one blocking car left which can be moved to
-        solve the board.
+        solve the board. The function checks if in the last column of the board
+        there is only one car, of length 3, left which can be moved far enough
+        up or down to free the path to the exit.
 
         Args:
         -----------------------------------------------------------------------
@@ -349,28 +356,26 @@ class Astar:
         """
         last_col = [row[-1] for row in state.get_board()]
         blocking_cars = self.get_cars_blocking_red(state)
+        blocker = blocking_cars[0]
         # check if only one car is blocking the red car
         if len(blocking_cars) == 1:
             # for 9x9 boards
-            if state.dim_board == 9 and blocking_cars[0].x == 8:
-                blocker = blocking_cars[0]
-                if blocker.length == 3:
-                    # check if the blocking car is in a position it can move
-                    # out of the free the exit
-                    # without having to move other vehicles
-                    return (
-                    all(ID == ' ' or (ID == blocker.id) for ID in last_col[0:6]) or\
-                    all(ID == ' ' or (ID == blocker.id) for ID in last_col[2:8]) or\
-                    all(ID == ' ' or (ID == blocker.id) for ID in last_col[1:6]) or\
-                    all(ID == ' ' or (ID == blocker.id) for ID in last_col[3:8]) or\
-                    all(ID == ' ' or (ID == blocker.id) for ID in last_col[1:7]) or\
-                    all(ID == ' ' or (ID == blocker.id) for ID in last_col[4:8])
-                    )
-                
+            if state.dim_board == 9 and blocking_cars[0].x == 8 and\
+                                                    blocker.length == 3:
+                # check if the blocking car is in a position it can move
+                # out of the free the exit
+                # without having to move other vehicles
+                return (
+                all(ID == ' ' or (ID == blocker.id) for ID in last_col[0:6]) or\
+                all(ID == ' ' or (ID == blocker.id) for ID in last_col[2:8]) or\
+                all(ID == ' ' or (ID == blocker.id) for ID in last_col[1:6]) or\
+                all(ID == ' ' or (ID == blocker.id) for ID in last_col[3:8]) or\
+                all(ID == ' ' or (ID == blocker.id) for ID in last_col[1:7]) or\
+                all(ID == ' ' or (ID == blocker.id) for ID in last_col[4:8])
+                    )  
             # for 6x6 boards
-            if state.dim_board == 6 and blocking_cars[0].x == 5:
-                blocker = blocking_cars[0]
-                if blocker.length == 3:
+            if state.dim_board == 6 and blocking_cars[0].x == 5 and\
+                                                    blocker.length == 3:
                     # check if the blocking car is in a position it can move
                     # out of the free the exit
                     # without having to move other vehicles
@@ -424,10 +429,10 @@ class Astar:
             # if no solution, add the current state to the closed states
             closed_states.add(current_state)
 
-            # generate the states to be visited, with option to generate
-            # look-ahead
+            # generate states to be visited, with option to generate look-ahead
             # states specified by depth
-            future_states = current_state.generate_future_states(current_state, depth=1)
+            future_states = current_state.generate_future_states(current_state,\
+                                                                 depth=1)
 
             for state in future_states:
                 # if a state is a winning state, break and return path
@@ -435,10 +440,11 @@ class Astar:
                     solution_path = self.reconstruct_path(state)
                     return {'solution': solution_path}
                 
-                # check if state is not already visited or in the set with open states
+                # check if state is not yet visited or in set with open states
                 if state not in closed_states and state not in open_set:
                     # calculate cost of the state and add to the list
-                    heapq.heappush(open_states, HeapItem(self.total_heuristic_function(state), state))
+                    heapq.heappush(open_states,\
+                        HeapItem(self.total_heuristic_function(state), state))
                     open_set.add(state)
                     
             iterations += 1
