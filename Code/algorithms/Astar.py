@@ -75,7 +75,7 @@ class Astar:
         self.left = False
 
     def is_red_car_left(self, state: RushHour) -> bool:
-        red_car = state.get_red_car()
+        red_car = state.red_car
         if red_car.x <= 3: self.left = True
 
     def blocking_cars_iterative(self, state: RushHour, max_depth: int)\
@@ -96,7 +96,7 @@ class Astar:
         # keep track of the vehicles already considered as blockers
         already_considered = set()
         # start with the cars directly blocking the red car as current blockers
-        current_level_blockers = set(state.get_cars_blocking_red())
+        current_level_blockers = set(state.blockers)
 
         all_blockers = set(current_level_blockers)
         already_considered.update(current_level_blockers)
@@ -207,7 +207,7 @@ class Astar:
         -----------------------------------------------------------------------
             int: The count of blocking cars with a length of three.
         """
-        blockers = state.get_cars_blocking_red()
+        blockers = state.blockers
         count = 0
         for v in blockers: 
             if v.length == 3: count +=1
@@ -225,7 +225,7 @@ class Astar:
         -----------------------------------------------------------------------
             int: The Manhattan distance to the exit.
         """
-        red_car = state.get_red_car()
+        red_car = state.red_car
         return (state.dim_board - 2 - red_car.x)
     
     def total_cost_function(self, state: RushHour) -> int:
@@ -252,10 +252,8 @@ class Astar:
 
         '''9x9 4'''
         if extra_cost_long_cars >= 1:
-            distance_weight = -2
+            distance_weight = -1
             length_weight = 2
-            # blocker_weight = 0
-        # if not self.left: distance_weight = -1
         if extra_cost_long_cars == 0:
             distance_weight = 2
 
@@ -263,8 +261,6 @@ class Astar:
         # if extra_cost_long_cars >= 1:
         #     distance_weight = -2
         #     length_weight = 2
-        #     # blocker_weight = 0
-        # # if not self.left: distance_weight = -1
         # if extra_cost_long_cars == 0:
         #     distance_weight = 2   
 
@@ -285,7 +281,7 @@ class Astar:
             bool: True if the game is won, False otherwise.
         """
         # if no more blocking cars, game is won
-        return len(state.get_cars_blocking_red()) == 0
+        return len(state.blockers) == 0
     
     def reconstruct_path(self, end_state: RushHour) -> List[RushHour]:
         """
@@ -350,8 +346,10 @@ class Astar:
                             current_state.is_solvable():
                 # reconstruct the path taken for the solution
                 solution_path = self.reconstruct_path(current_state)
+                print(current_state)
                 # return the path
-                return {'solution': solution_path}
+                return {'visited': iterations,
+                        'solution': solution_path}
             
             # if no solution, add the current state to the closed states
             closed_states.add(current_state)
@@ -363,11 +361,8 @@ class Astar:
 
             for state in future_states:
                 # if a state is a winning state, break and return path
-                if self.is_winning_state(state) or state.is_solvable():
-                    solution_path = self.reconstruct_path(state)
-                    return {'visited': iterations,
-                            'solution': solution_path}
-                
+                if state.is_solvable() or self.is_winning_state(state):
+                    heapq.heappush(open_states, HeapItem(-50, state))
                 # check if state is not yet visited or in set with open states
                 if state not in closed_states and state not in open_set:
                     # calculate cost of the state and add to the list
