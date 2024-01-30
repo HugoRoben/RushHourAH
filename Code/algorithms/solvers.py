@@ -181,8 +181,6 @@ def solve_game(rush_game, algorithm, max_depth=1000, max_iterations=1000000):
         results = iterative_deepening_search(rush_game, max_depth)
     elif algorithm.lower() == 'bfs':
         results = breadth_first_search(rush_game, max_depth)
-    elif algorithm.lower() == 'dfs':
-        results = depth_First_Search(rush_game, max_depth)
     elif algorithm.lower() == 'random':
         results = random_solve_puzzle(rush_game, max_iterations)
     else:

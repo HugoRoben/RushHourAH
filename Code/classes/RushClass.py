@@ -193,33 +193,35 @@ class RushHour(object):
         # out of the free the exit
         # without having to move other vehicles
         path_free = False
-        if self.dim_board == 9:
+        if(self.dim_board // 2 == 0): exit_row = self.dim_board // 2 - 1
+        else: exit_row = self.dim_board // 2
+        if self.dim_board == 9 or self.dim_board == 12:
             for blocker in blocking_cars:
                 if blocker.length == 3:
-                    if blocker.y == 2:
-                        if not ({(blocker.x, 0), (blocker.x, 1)}.intersection(self.occupied_coords)) or\
-                            not ({(blocker.x, 5), (blocker.x, 6), (blocker.x, 7)}.intersection(self.occupied_coords)):
+                    if blocker.y == exit_row - 2:
+                        if not ({(blocker.x, blocker.y - 1)}.intersection(self.occupied_coords)) or\
+                            not ({(blocker.x, blocker.y + 3), (blocker.x, blocker.y + 4), (blocker.x, blocker.y + 5)}.intersection(self.occupied_coords)):
                                 path_free = True
                         else: return False
-                    if blocker.y == 3:
-                        if not ({(blocker.x, 1), (blocker.x, 2)}.intersection(self.occupied_coords)) or\
-                            not ({(blocker.x, 6), (blocker.x, 7)}.intersection(self.occupied_coords)):
+                    if blocker.y == exit_row - 3:
+                        if not ({(blocker.x, blocker.y - 2), (blocker.x, blocker.y - 1)}.intersection(self.occupied_coords)) or\
+                            not ({(blocker.x, blocker.y + 3), (blocker.x, blocker.y + 4)}.intersection(self.occupied_coords)):
                                 path_free = True
                         else: return False
-                    if blocker.y == 4:
-                        if not ({(blocker.x, 1), (blocker.x, 2), (blocker.x, 3)}.intersection(self.occupied_coords)) or\
-                            not ({(blocker.x, 7), (blocker.x, 8)}.intersection(self.occupied_coords)):
+                    if blocker.y == exit_row:
+                        if not ({(blocker.x, blocker.y - 3), (blocker.x, blocker.y - 2), (blocker.x, blocker.y - 1)}.intersection(self.occupied_coords)) or\
+                            not ({(blocker.x, blocker.y + 3)}.intersection(self.occupied_coords)):
                                 path_free = True
                         else: return False
                 if blocker.length == 2:
-                    if blocker.y == 3:
-                        if not ({(blocker.x, 2)}.intersection(self.occupied_coords)) or\
-                            not ({(blocker.x, 5), (blocker.x, 6)}.intersection(self.occupied_coords)):
+                    if blocker.y == exit_row - 1:
+                        if not ({(blocker.x, blocker.y - 1)}.intersection(self.occupied_coords)) or\
+                            not ({(blocker.x, blocker.y + 2), (blocker.x, blocker.y + 3)}.intersection(self.occupied_coords)):
                                 path_free = True
                         else: return False
-                    if blocker.y == 4: 
-                        if not ({(blocker.x, 2), (blocker.x, 3)}.intersection(self.occupied_coords)) or\
-                            not ({(blocker.x, 6)}.intersection(self.occupied_coords)):
+                    if blocker.y == exit_row: 
+                        if not ({(blocker.x, blocker.y - 2), (blocker.x, blocker.y - 1)}.intersection(self.occupied_coords)) or\
+                            not ({(blocker.x, blocker.y + 2)}.intersection(self.occupied_coords)):
                                 path_free = True
                         else: return False
             return path_free
@@ -236,3 +238,4 @@ class RushHour(object):
                 return not ({(5, 4), (5, 5)}.intersection(self.occupied_coords))
             if blocker.y == 2:
                 return not ({(5,5)}.intersection(self.occupied_coords))
+            

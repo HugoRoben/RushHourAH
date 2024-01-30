@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-
 def visualize(stats, algo, save_to_file=False):
     times = stats['times']
     steps = stats['steps']

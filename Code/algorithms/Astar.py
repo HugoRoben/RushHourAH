@@ -336,6 +336,8 @@ class Astar:
         # keep the states to be visited in a set
         open_set = {initial_state}
         iterations = 0
+        print(initial_state)
+        # print(initial_state.occupied_coords)
 
         while open_states:
             if iterations >= max_iterations:
@@ -365,6 +367,7 @@ class Astar:
                 # if a state is a winning state, break and return path
                 if self.is_winning_state(state) or state.is_solvable():
                     solution_path = self.reconstruct_path(state)
+                    print(state)
                     return {'solution': solution_path}
                 
                 # check if state is not yet visited or in set with open states
