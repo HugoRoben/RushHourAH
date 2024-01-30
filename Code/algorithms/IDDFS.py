@@ -1,7 +1,7 @@
 from collections import deque
 from .Astar import *
 
-def iterative_deepening_search(RushGame: RushHour, max_depth: int=500) -> str:
+def iterative_deepening_search(RushGame: RushHour, max_depth: int=500):
     """
     Performs an iterative deepening search on the Rush Hour game.
 

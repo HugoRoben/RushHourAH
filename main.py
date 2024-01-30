@@ -3,16 +3,6 @@ import matplotlib.pyplot as plt
 from Code.visual import results
 from Code.algorithms.solvers import *
 from Code.visual.visualizer import Visualizer
-
-# python3 main.py txt bfs --game_range '0-2'
-# python3 main.py txt bfs --single_game 1
-# python3 main.py txt bfs --single_game 1 --repeat 2
-# python3 main.py txt bfs --all_games
-# python3 main.py txt bfs --single_game 1 --repeat 10
-# python3 main.py txt bfs --all_games -- repeat 5
-# python3 main.py csv bfs --dimension 6 --board 3
-# python3 main.py csv bfs --dimension 6 --board 3 --repeat 5
-
 import cProfile
 
 def parse_arguments():

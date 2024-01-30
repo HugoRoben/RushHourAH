@@ -45,15 +45,13 @@ Commands used to print the results of each algorithm on the 6x6_3 board. (Some a
 
 We do the same for the 9x9_4 board and the 12x12_7 board, by replacing the  --dimension 6 --board 3 parts with  --dimension 9 --board 4 and  --dimension 12 --board 7 respectively.
 
-
-
-
 Example commands:
+- python3 main.py txt bfs --game_range '0-2'
 - python3 main.py txt bfs --single_game 1
 - python3 main.py txt bfs --single_game 1 --repeat 2
 - python3 main.py txt bfs --all_games
 - python3 main.py txt bfs --single_game 1 --repeat 10
-- python3 main.py txt bfs --all_games -- repeat 5
+- python3 main.py txt bfs --all_games --repeat 5
 - python3 main.py csv bfs --dimension 6 --board 3
 - python3 main.py csv bfs --dimension 6 --board 3 --repeat 5
 
