@@ -5,12 +5,14 @@ if a game is won.
 '''
 from Code.classes.VehicleClass import Vehicle
 from typing import Tuple, Set, Optional, List
+from bisect import insort
 
 class RushHour(object):
     """A configuration of a single Rush Hour board."""
 
     def __init__(self, vehicles: set, dimension: int, parent: 'RushHour' = None, occupied_coords: set = None):
-        self.vehicles = vehicles
+        # self.vehicles = vehicles
+        self.vehicles = sorted(vehicles, key=lambda v: v.id)
         self.dim_board = dimension
         self.parent = parent
         # get occupied coordinates from vehicles if first initialisation of the game
@@ -27,18 +29,17 @@ class RushHour(object):
     def get_occupied_coords_set(self) -> Set[Tuple]:
         return set().union(*map(self.get_vehicle_coords, self.vehicles))
     
-    
-    def __hash__(self):
-        return hash(self.__repr__())
-    
     def __eq__(self, other: 'RushHour'):
         if not isinstance(other, RushHour):
             return False
-        return self.vehicles == other.vehicles and self.dim_board == other.dim_board
+        return self.vehicles == other.vehicles
 
     def __ne__(self, other: 'RushHour'):
         return not self.__eq__(other)
 
+    def __hash__(self):
+        board_str = ''.join(f'{v.id}{v.x}{v.y}' for v in self.vehicles)
+        return hash(board_str)
 
     def __repr__(self):
         board = self.get_board()
@@ -143,7 +144,8 @@ class RushHour(object):
         new_vehicles = self.vehicles.copy()
         # remove vehicle to be moved and add back with updated coordinates
         new_vehicles.remove(v)
-        new_vehicles.add(new_v)
+        # new_vehicles.add(new_v)
+        insort(new_vehicles, new_v)
         # copy and update the set of te occupied coordinates
         new_occupied_coords = self.occupied_coords.copy()
         new_occupied_coords.remove(old_coords)
@@ -185,28 +187,29 @@ class RushHour(object):
         blocking_cars = self.get_cars_blocking_red()
         # if more than one blocker, return False
         if len(blocking_cars) > 1 or blocking_cars[0].length != 3: return False
-
-        last_col = [row[-1] for row in self.get_board()]
         blocker = blocking_cars[0]
         # for 9x9 boards
-        if self.dim_board == 9 and blocking_cars[0].x == 8:
+        # check if the blocking car is in a position it can move
+        # out of the free the exit
+        # without having to move other vehicles
+        if self.dim_board == 9:
+            if blocker.y == 2:
+                return not ({(8, 0), (8, 1)}.intersection(self.occupied_coords)) or\
+                    not ({(8, 5), (8, 6), (8, 7)}.intersection(self.occupied_coords))
+            if blocker.y == 3:
+                return not ({(8, 1), (8, 2)}.intersection(self.occupied_coords)) or\
+                    not ({(8, 6), (8, 7)}.intersection(self.occupied_coords))
+            if blocker.y == 4:
+                return not ({(8, 1), (8, 2), (8, 3)}.intersection(self.occupied_coords)) or\
+                    not ({(8, 7), (8, 8)}.intersection(self.occupied_coords))
+        # for 6x6 boards
+        if self.dim_board == 6 and blocking_cars[0].x == 5:
             # check if the blocking car is in a position it can move
             # out of the free the exit
             # without having to move other vehicles
-            return (
-            all(ID == ' ' or (ID == blocker.id) for ID in last_col[0:6]) or\
-            all(ID == ' ' or (ID == blocker.id) for ID in last_col[2:8]) or\
-            all(ID == ' ' or (ID == blocker.id) for ID in last_col[1:6]) or\
-            all(ID == ' ' or (ID == blocker.id) for ID in last_col[3:8]) or\
-            all(ID == ' ' or (ID == blocker.id) for ID in last_col[1:7]) or\
-            all(ID == ' ' or (ID == blocker.id) for ID in last_col[4:8])
-                )  
-        # for 6x6 boards
-        if self.dim_board == 6 and blocking_cars[0].x == 5:
-                # check if the blocking car is in a position it can move
-                # out of the free the exit
-                # without having to move other vehicles
-                return all(
-                    cell == ' ' or (cell == blocker.id) 
-                    for cell in last_col[blocker.y:self.dim_board]
-                )
+            if blocker.y == 0:
+                return not ({(5, 3), (5, 4), (5,5)}.intersection(self.occupied_coords))
+            if blocker.y == 1:
+                return not ({(5, 4), (5, 5)}.intersection(self.occupied_coords))
+            if blocker.y == 2:
+                return not ({(5,5)}.intersection(self.occupied_coords))

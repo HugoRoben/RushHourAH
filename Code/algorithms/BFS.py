@@ -1,7 +1,7 @@
 from collections import deque
 from ..classes.RushClass import RushHour
 
-def breadth_first_search(RushGame: RushHour, max_depth=100):
+def breadth_first_search(RushGame: RushHour, max_depth: int =100):
     """
     Perform a breadth-first search to solve the Rush Hour puzzle.
 
@@ -30,7 +30,6 @@ def breadth_first_search(RushGame: RushHour, max_depth=100):
     """
     
     visited_states = set()
-    # solutions = []
     states_per_depth = {}
 
     visit_queue = deque()
@@ -49,9 +48,6 @@ def breadth_first_search(RushGame: RushHour, max_depth=100):
 
             if current_board.is_solved():
                 solution = current_path
-                # if solution:
-                #     visualizer = Visualizer(600, 600)
-                #     visualizer.animate_solution(solution)
                 break
             else:
                 for move in current_board.moves():
