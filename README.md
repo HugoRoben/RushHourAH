@@ -35,6 +35,27 @@ python main.py txt bfs --game_range '0-2'
 python main.py txt Astar --single_game 1
 - Repeat a game multiple times using the Random algorithm:
 python main.py txt Random --single_game 1 --repeat 10
+- python3 main.py txt bfs --game_range '0-2'
+
+Commands used to print the results of each algorithm on the 6x6_3 board. (Some algorithms give incosistent results at each experiment so we repeat the experiment and use the mean value of the results):
+- python3 main.py csv random --dimension 6 --board 3 --repeat 1000
+- python3 main.py csv bfs --dimension 6 --board 3
+- python3 main.py csv iddfs --dimension 6 --board 3
+- python3 main.py csv astar --dimension 6 --board 3  --repeat 1000
+
+We do the same for the 9x9_4 board and the 12x12_7 board, by replacing the  --dimension 6 --board 3 parts with  --dimension 9 --board 4 and  --dimension 12 --board 7 respectively.
+
+
+
+
+Example commands:
+- python3 main.py txt bfs --single_game 1
+- python3 main.py txt bfs --single_game 1 --repeat 2
+- python3 main.py txt bfs --all_games
+- python3 main.py txt bfs --single_game 1 --repeat 10
+- python3 main.py txt bfs --all_games -- repeat 5
+- python3 main.py csv bfs --dimension 6 --board 3
+- python3 main.py csv bfs --dimension 6 --board 3 --repeat 5
 
 ## Features
 - Multiple solving algorithms: A*, IDDFS, BFS, Random.

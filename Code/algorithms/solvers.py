@@ -7,8 +7,6 @@ from Code.classes.RushClass import RushHour
 from Code.algorithms.Random import *
 from Code.algorithms.BFS import *
 from Code.algorithms.Astar import *
-from Code.algorithms.DFS import * 
-
 
 def load_game_data(args):
     """
@@ -210,7 +208,8 @@ def solve_rush_hour_games(rush_games, algorithm, repeat):
     repeat (int): Number of times to repeat solving each game.
     
     Returns:
-    Tuple[Dict[str, List[float]], int, List[Optional[Dict[str, any]]]]: Tuple containing statistics, the count of unsolved games, and the list of solutions.
+    Tuple[Dict[str, List[float]], int, List[Optional[Dict[str, any]]]]: Tuple containing
+    statistics, the count of unsolved games, and the list of solutions.
     
     Pre-conditions:
     - rush_games should be a generator yielding RushHour instances.
@@ -233,8 +232,6 @@ def solve_rush_hour_games(rush_games, algorithm, repeat):
                 stats["times"].append(result["time"])
                 stats["steps"].append(result["steps"])
                 unsolved_count += unsolved
-                # if solution:
-                #     solutions.append(solution)
                 game_count += 1
                 progress_bar.update(1)
                 progress_bar.set_description(f"Processed {game_count} games")

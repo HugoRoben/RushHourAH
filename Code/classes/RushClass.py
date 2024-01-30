@@ -186,24 +186,47 @@ class RushHour(object):
         """
         blocking_cars = self.get_cars_blocking_red()
         # if more than one blocker, return False
-        if len(blocking_cars) > 1 or blocking_cars[0].length != 3: return False
-        blocker = blocking_cars[0]
+        # if len(blocking_cars) > 1 or blocking_cars[0].length != 3: return False
+        # blocker = blocking_cars[0]
         # for 9x9 boards
         # check if the blocking car is in a position it can move
         # out of the free the exit
         # without having to move other vehicles
+        path_free = False
         if self.dim_board == 9:
-            if blocker.y == 2:
-                return not ({(8, 0), (8, 1)}.intersection(self.occupied_coords)) or\
-                    not ({(8, 5), (8, 6), (8, 7)}.intersection(self.occupied_coords))
-            if blocker.y == 3:
-                return not ({(8, 1), (8, 2)}.intersection(self.occupied_coords)) or\
-                    not ({(8, 6), (8, 7)}.intersection(self.occupied_coords))
-            if blocker.y == 4:
-                return not ({(8, 1), (8, 2), (8, 3)}.intersection(self.occupied_coords)) or\
-                    not ({(8, 7), (8, 8)}.intersection(self.occupied_coords))
+            for blocker in blocking_cars:
+                if blocker.length == 3:
+                    if blocker.y == 2:
+                        if not ({(blocker.x, 0), (blocker.x, 1)}.intersection(self.occupied_coords)) or\
+                            not ({(blocker.x, 5), (blocker.x, 6), (blocker.x, 7)}.intersection(self.occupied_coords)):
+                                path_free = True
+                        else: return False
+                    if blocker.y == 3:
+                        if not ({(blocker.x, 1), (blocker.x, 2)}.intersection(self.occupied_coords)) or\
+                            not ({(blocker.x, 6), (blocker.x, 7)}.intersection(self.occupied_coords)):
+                                path_free = True
+                        else: return False
+                    if blocker.y == 4:
+                        if not ({(blocker.x, 1), (blocker.x, 2), (blocker.x, 3)}.intersection(self.occupied_coords)) or\
+                            not ({(blocker.x, 7), (blocker.x, 8)}.intersection(self.occupied_coords)):
+                                path_free = True
+                        else: return False
+                if blocker.length == 2:
+                    if blocker.y == 3:
+                        if not ({(blocker.x, 2)}.intersection(self.occupied_coords)) or\
+                            not ({(blocker.x, 5), (blocker.x, 6)}.intersection(self.occupied_coords)):
+                                path_free = True
+                        else: return False
+                    if blocker.y == 4: 
+                        if not ({(blocker.x, 2), (blocker.x, 3)}.intersection(self.occupied_coords)) or\
+                            not ({(blocker.x, 6)}.intersection(self.occupied_coords)):
+                                path_free = True
+                        else: return False
+            return path_free
+
         # for 6x6 boards
-        if self.dim_board == 6 and blocking_cars[0].x == 5:
+        if self.dim_board == 6 and blocking_cars[0].x == 5 and len(blocking_cars) == 1:
+            blocker = blocking_cars[0]
             # check if the blocking car is in a position it can move
             # out of the free the exit
             # without having to move other vehicles

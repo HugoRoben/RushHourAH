@@ -2,6 +2,7 @@ import argparse
 import matplotlib.pyplot as plt
 from Code.visual import results
 from Code.algorithms.solvers import *
+from Code.visual.visualizer import Visualizer
 
 # python3 main.py txt bfs --game_range '0-2'
 # python3 main.py txt bfs --single_game 1
@@ -55,6 +56,7 @@ def main():
     
     if solutions:
         visualizer = Visualizer(600, 600)
+        
         visualizer.animate_solution(solutions)
 
 

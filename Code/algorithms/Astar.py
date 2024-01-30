@@ -251,22 +251,22 @@ class Astar:
         # if blocking cars with length three, change weights
 
         '''9x9 4'''
-        # if extra_cost_long_cars >= 1:
-        #     distance_weight = 0
-        #     length_weight = 2
-        #     # blocker_weight = 0
-        # # if not self.left: distance_weight = -1
-        # if extra_cost_long_cars == 0:
-        #     distance_weight = 2
-
-        '''9x9 5'''
         if extra_cost_long_cars >= 1:
             distance_weight = -2
             length_weight = 2
             # blocker_weight = 0
         # if not self.left: distance_weight = -1
         if extra_cost_long_cars == 0:
-            distance_weight = 2   
+            distance_weight = 2
+
+        '''9x9 5'''
+        # if extra_cost_long_cars >= 1:
+        #     distance_weight = -2
+        #     length_weight = 2
+        #     # blocker_weight = 0
+        # # if not self.left: distance_weight = -1
+        # if extra_cost_long_cars == 0:
+        #     distance_weight = 2   
 
         return blocking_cost * blocker_weight + distance_cost * distance_weight +\
                     extra_cost_long_cars * length_weight
@@ -355,9 +355,7 @@ class Astar:
             
             # if no solution, add the current state to the closed states
             closed_states.add(current_state)
-            if iterations % 1000 == 0: 
-                Visualizer(600, 600).draw(current_state)
-
+            
             # generate states to be visited, with option to generate look-ahead
             # states specified by depth
             future_states = current_state.generate_future_states(current_state,\
