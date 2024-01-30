@@ -48,6 +48,7 @@ def format_stat(value):
 def desc_stats(stats, unsolved_count, algo, save_to_file=False):
     times = stats['times']
     steps = stats['steps']
+    visited = stats['visited']
     total_games = len(times)
     output = ""
 
@@ -83,6 +84,7 @@ def desc_stats(stats, unsolved_count, algo, save_to_file=False):
         output += f"Status         : {solved_status}\n"
         output += f"Time Taken (s) : {format_stat(times[0]) if times else 'N/A'}\n"
         output += f"Number of Steps: {format_stat(steps[0]) if steps else 'N/A'}\n"
+        output += f"States visited : {format_stat(visited[0]) if visited else 'N/A'}\n"
 
     print(output)
 

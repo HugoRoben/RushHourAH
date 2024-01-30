@@ -50,7 +50,7 @@ def load_game_data(args):
             return None
 
 
-def load_csv_file(rushhour_file, dimension):
+def load_csv_file(rushhour_file, dimension) -> RushHour:
     """
     Loads Rush Hour game instances from a CSV file.
     
@@ -78,7 +78,7 @@ def load_csv_file(rushhour_file, dimension):
     yield RushHour(set(vehicles), dimension)
 
 
-def load_txt_file(file_path, game_indices, dimension=6):
+def load_txt_file(file_path, game_indices: int, dimension: int =6) -> RushHour:
     """
     Loads Rush Hour games from a text file.
     
@@ -124,7 +124,7 @@ def load_txt_file(file_path, game_indices, dimension=6):
             yield RushHour(set(vehicles), dimension)
 
 
-def get_game_indices(args, total_games):
+def get_game_indices(args, total_games: int) -> List[str]:
     """
     Determines game indices to load based on user arguments.
     
@@ -151,7 +151,8 @@ def get_game_indices(args, total_games):
         return list(range(start, end + 1))
 
 
-def solve_game(rush_game, algorithm, max_depth=1000, max_iterations=1000000):
+def solve_game(rush_game: RushHour, algorithm: str, max_depth: int =1000,\
+                    max_iterations: int =1000000):
     """
     Solves a Rush Hour game using a specified algorithm.
     
@@ -190,13 +191,14 @@ def solve_game(rush_game, algorithm, max_depth=1000, max_iterations=1000000):
     end_time = time.perf_counter()
     if results and (results.get('solution')):
         solution = results.get('solution')
+        visited = results.get('visited')
         steps = len(solution)
-        return solution, {"steps": steps, "time": end_time - start_time}, 0
+        return solution, {"steps": steps, "visited": visited, "time": end_time - start_time}, 0
     else:
         return {"steps": 0, "time": 0}, 1
 
 
-def solve_rush_hour_games(rush_games, algorithm, repeat):
+def solve_rush_hour_games(rush_games: List[RushHour], algorithm: str, repeat: int):
     """
     Solves multiple Rush Hour games using the specified algorithm.
     
@@ -218,7 +220,7 @@ def solve_rush_hour_games(rush_games, algorithm, repeat):
     - Returns game solving statistics, unsolved game count, and solutions.
     """
     
-    stats = {"times": [], "steps": []}
+    stats = {"times": [], "steps": [], "visited": [],}
     unsolved_count = 0
     solutions = []
     game_count = 0 
@@ -229,6 +231,7 @@ def solve_rush_hour_games(rush_games, algorithm, repeat):
                 solutions, result, unsolved = solve_game(game, algorithm)
                 stats["times"].append(result["time"])
                 stats["steps"].append(result["steps"])
+                stats["visited"].append(result["visited"])
                 unsolved_count += unsolved
                 game_count += 1
                 progress_bar.update(1)

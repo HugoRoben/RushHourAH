@@ -74,7 +74,7 @@ class Astar:
         self.vehicles = begin_state.vehicles
         self.left = False
 
-    def is_red_car_left(self, state):
+    def is_red_car_left(self, state: RushHour) -> bool:
         red_car = state.get_red_car()
         if red_car.x <= 3: self.left = True
 
@@ -336,8 +336,6 @@ class Astar:
         # keep the states to be visited in a set
         open_set = {initial_state}
         iterations = 0
-        print(initial_state)
-        # print(initial_state.occupied_coords)
 
         while open_states:
             if iterations >= max_iterations:
@@ -367,8 +365,8 @@ class Astar:
                 # if a state is a winning state, break and return path
                 if self.is_winning_state(state) or state.is_solvable():
                     solution_path = self.reconstruct_path(state)
-                    print(state)
-                    return {'solution': solution_path}
+                    return {'visited': iterations,
+                            'solution': solution_path}
                 
                 # check if state is not yet visited or in set with open states
                 if state not in closed_states and state not in open_set:

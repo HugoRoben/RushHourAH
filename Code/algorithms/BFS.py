@@ -1,7 +1,7 @@
 from collections import deque
 from ..classes.RushClass import RushHour
 
-def breadth_first_search(RushGame: RushHour, max_depth: int =100):
+def breadth_first_search(RushGame: RushHour, max_depth: int =100) -> str:
     """
     Perform a breadth-first search to solve the Rush Hour puzzle.
 
