@@ -217,7 +217,7 @@ class Astar:
 
         # determine te weights based on the current state
         if extra_cost_long_cars >= 1:
-            distance_weight = -1
+            distance_weight = -2
             length_weight = 2
         if extra_cost_long_cars == 0:
             distance_weight = 2
@@ -297,7 +297,7 @@ class Astar:
             # generate states to be visited, with option to generate look-ahead
             # states specified by depth
             future_states = current_state.generate_future_states(current_state,\
-                                                                 depth=1)
+                                                                 depth=2)
             for state in future_states:
                 # if a state is directly solvable, assign low cost to add to 
                 # the front of the list

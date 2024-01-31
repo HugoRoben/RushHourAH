@@ -1,0 +1,7 @@
+
+Game Statistics (astar):
+-------------------------
+Status         : Solved
+Time Taken (s) : 292.677
+Number of Steps: 322
+States visited : 520452

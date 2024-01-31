@@ -44,7 +44,7 @@ def format_stat(value):
         return str(value)
 
 
-def desc_stats(stats, unsolved_count, algo, save_to_file=False):
+def desc_stats(stats, unsolved_count, algo, save_to_file=True):
     times = stats['times']
     steps = stats['steps']
     visited = stats['visited']
@@ -96,7 +96,7 @@ def desc_stats(stats, unsolved_count, algo, save_to_file=False):
     print(output)
 
     if save_to_file:
-        file_name = f'data/{algo}_stats.txt'
+        file_name = f'data/{algo}_stats_9_4_depth2.txt'
         with open(file_name, 'w') as file:
             file.write(output)
         print(f"Statistics saved as {file_name}")
@@ -123,7 +123,7 @@ def plot_steps_histogram(steps, algo, save_to_file=False):
     fig.tight_layout()
 
     if save_to_file:
-        file_name = f'data/{algo}_steps_histogram.png'
+        file_name = f'data/{algo}_steps_9_4_depth1.png'
         plt.savefig(file_name)
         plt.close()
         print(f"Histogram saved as {file_name}")
