@@ -1,7 +1,7 @@
 import pygame
 import random
 from ..classes.RushClass import RushHour
-from typing import Tuple, List
+from typing import Tuple, List, Set
 
 def random_color() -> Tuple[int, int, int]:
     """
@@ -30,7 +30,7 @@ class Visualizer:
         self.clock = pygame.time.Clock()
         self.color_map = {}
 
-    def get_vehicle_color(self, car_id: str):
+    def get_vehicle_color(self, car_id: str) -> Tuple(int, int, int):
         """
         Check if car already has a colour assigned, if not call random_color.
 
