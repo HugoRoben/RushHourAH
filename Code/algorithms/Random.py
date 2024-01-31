@@ -21,9 +21,7 @@ def random_solve_puzzle(Rush_game: RushHour, max_iterations: int=1000000) -> str
 
     for _ in range(max_iterations):
         if game.is_solved():
-            # visualizer = Visualizer(600, 600)
-            # visualizer.animate_solution(solution_path)
-            return {'game': game, 'solution': solution_path}
+            return {'game': game, 'solution': solution_path, 'visited': _}
 
         possible_moves = list(game.moves())
         if not possible_moves:

@@ -46,7 +46,7 @@ def breadth_first_search(RushGame: RushHour, max_depth: int =100) -> str:
         if current_board not in visited_states:
             visited_states.add(current_board)
 
-            if current_board.is_solved() or current_board.is_solvable():
+            if current_board.is_solved():
                 solution = current_path
                 break
             else:

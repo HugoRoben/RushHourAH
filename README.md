@@ -15,18 +15,18 @@ git clone [https://github.com/HugoRoben/RushHourAH.git]
 cd RushHourAH
 2. Install the required libraries:
 pip install -r requirements.txt
+```
 
 ### Requirements
 - Each experiment is run using a Macbook Pro 13 inch 
 - Python 3
 - Libraries: `tqdm`, `matplotlib`, `numpy`, `pygame` (See `requirements.txt` for more details)
 
-
 ### Executing program
 
 ## Usage
 The project can be run from the command line. Here are some example commands:
-
+```bash
 python main.py [file_type] [algorithm] [additional options]
 Replace [file_type] with csv or txt, [algorithm] with the chosen algorithm (e.g., Astar, IDDFS, BFS, Random), and include any additional options as needed, such as the dimension of the board or the amount of iterations.
 - Run BFS algorithm for a specific range of games:
@@ -54,6 +54,7 @@ Example commands:
 - python3 main.py txt bfs --all_games --repeat 5
 - python3 main.py csv bfs --dimension 6 --board 3
 - python3 main.py csv bfs --dimension 6 --board 3 --repeat 5
+```
 
 ## Features
 - Multiple solving algorithms: A*, IDDFS, BFS, Random.

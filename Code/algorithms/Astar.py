@@ -342,8 +342,7 @@ class Astar:
 
             # check if the game is won or the game is in a state where it is
             # directly solvable
-            if self.is_winning_state(current_state) or\
-                            current_state.is_solvable():
+            if current_state.is_solved():
                 # reconstruct the path taken for the solution
                 solution_path = self.reconstruct_path(current_state)
                 print(current_state)
@@ -361,7 +360,7 @@ class Astar:
 
             for state in future_states:
                 # if a state is a winning state, break and return path
-                if state.is_solvable() or self.is_winning_state(state):
+                if state.is_solved():
                     heapq.heappush(open_states, HeapItem(-50, state))
                 # check if state is not yet visited or in set with open states
                 if state not in closed_states and state not in open_set:

@@ -12,7 +12,6 @@ def visualize(stats, algo, save_to_file=False):
 
     fig, axs = plt.subplots(1, 2, figsize=(15, 7))
 
-
     log_times = np.log1p(times)
     num_bins_time = min(500, len(np.unique(log_times)))
     axs[0].hist(log_times, bins=num_bins_time, color='tab:blue', edgecolor='black')
@@ -55,6 +54,7 @@ def desc_stats(stats, unsolved_count, algo, save_to_file=False):
     if total_games > 1:
         total_times = sum(times)
         total_steps = sum(steps)
+        total_visited = sum(visited)
         solved = len(times)
 
         # Puzzle statistics
@@ -76,6 +76,13 @@ def desc_stats(stats, unsolved_count, algo, save_to_file=False):
         output += f"Mean           : {format_stat(np.mean(steps))}\n"
         output += f"Min            : {format_stat(np.min(steps))}\n"
         output += f"Max            : {format_stat(np.max(steps))}\n"
+        
+        # Visited statistics
+        output += f"\Visited states Statistics:\n{'-' * 36}\n"
+        output += f"Total Steps               : {format_stat(total_visited)}\n"
+        output += f"Mean                      : {format_stat(np.mean(visited))}\n"
+        output += f"Min                       : {format_stat(np.min(visited))}\n"
+        output += f"Max                       : {format_stat(np.max(visited))}\n"
 
     # When only one game is played
     else:
@@ -94,3 +101,31 @@ def desc_stats(stats, unsolved_count, algo, save_to_file=False):
             file.write(output)
         print(f"Statistics saved as {file_name}")
 
+def plot_steps_histogram(steps, algo, save_to_file=False):
+    num_bins = 42
+
+    fig, ax = plt.subplots()
+
+    # Histogram of the data
+    n, bins, patches = ax.hist(steps, num_bins, density=False)
+
+    # Calculate the mean of steps and add a vertical line at the mean
+    mean_steps = sum(steps) / len(steps)
+    ax.axvline(mean_steps, color='red', linestyle='dashed', linewidth=1)
+
+    # Add a label for the mean line
+    ax.text(mean_steps, max(n), f'    Mean: {mean_steps:.0f}', color='red', ha='left')
+
+    ax.set_xlabel('Number of Steps')
+    ax.set_ylabel('Frequency')
+    ax.set_title(f'{algo} - Histogram of Steps Taken')
+
+    fig.tight_layout()
+
+    if save_to_file:
+        file_name = f'data/{algo}_steps_histogram.png'
+        plt.savefig(file_name)
+        plt.close()
+        print(f"Histogram saved as {file_name}")
+    else:
+        plt.show()
