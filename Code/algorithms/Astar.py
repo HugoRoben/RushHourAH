@@ -9,6 +9,7 @@ from ..classes.VehicleClass import Vehicle
 import heapq
 from typing import Optional, List, Set
 from ..visual.visualizer import *
+
 class HeapItem:
     """
     Represents an item in the heap used in the A* search algorithm, with a

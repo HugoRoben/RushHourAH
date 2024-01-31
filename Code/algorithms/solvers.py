@@ -4,8 +4,8 @@ from tqdm import tqdm
 from Code.algorithms.IDDFS import *
 from Code.classes.VehicleClass import Vehicle
 from Code.classes.RushClass import RushHour
-from Code.algorithms.Random import *
-from Code.algorithms.BFS import *
+from Code.algorithms.Random import iterative_deepening_search
+from Code.algorithms.BFS import breadth_first_search
 from Code.algorithms.Astar import *
 
 def load_game_data(args):
@@ -13,16 +13,13 @@ def load_game_data(args):
     Loads game data based on specified file type and arguments.
     
     Args:
-    args: Command line arguments or equivalent, containing file_type and other relevant info.
+    ---------------------------------------------------------------------------
+        Command line arguments or equivalent, containing file_type 
+        and other relevant info.
     
     Returns:
-    A generator yielding RushHour game instances, or None if loading fails.
-    
-    Pre-conditions:
-    - args must have a 'file_type' attribute, and relevant attributes based on file type.
-    
-    Post-conditions:
-    - Returns a generator for RushHour instances if successful, otherwise None.
+    ---------------------------------------------------------------------------
+        A generator yielding RushHour game instances, or None if loading fails.
     """
     
     file_type = args.file_type.lower()
@@ -55,17 +52,14 @@ def load_csv_file(rushhour_file, dimension) -> RushHour:
     Loads Rush Hour game instances from a CSV file.
     
     Args:
-    rushhour_file (str): The path to the CSV file.
-    dimension (int): Dimension of the Rush Hour game board.
+    ---------------------------------------------------------------------------
+        rushhour_file (str): The path to the CSV file.
+        dimension (int): Dimension of the Rush Hour game board.
     
     Returns:
-    Generator[RushHour, None, None]: A generator yielding RushHour game instances.
-    
-    Pre-conditions:
-    - The CSV file should exist and be properly formatted.
-    
-    Post-conditions:
-    - Yields RushHour game instances.
+    ---------------------------------------------------------------------------
+        Generator[RushHour, None, None]: A generator yielding RushHour game 
+        instances.
     """
     
     vehicles = []
@@ -83,18 +77,15 @@ def load_txt_file(file_path, game_indices: int, dimension: int =6) -> RushHour:
     Loads Rush Hour games from a text file.
     
     Args:
-    file_path (str): Path to the text file.
-    game_indices (List[int]): List of game indices to load.
-    dimension (int): The dimension of the game board, default is 6.
-    
+    ---------------------------------------------------------------------------
+        file_path (str): Path to the text file.
+        game_indices (List[int]): List of game indices to load.
+        dimension (int): The dimension of the game board, default is 6.
+        
     Returns:
-    Generator[RushHour, None, None]: A generator yielding RushHour game instances.
-    
-    Pre-conditions:
-    - Text file should exist and contain game data in expected format.
-    
-    Post-conditions:
-    - Yields RushHour game instances based on the specified indices.
+    ---------------------------------------------------------------------------
+        Generator[RushHour, None, None]: A generator yielding RushHour game 
+        instances.
     """
     
     with open(file_path, 'r') as file:
@@ -129,17 +120,13 @@ def get_game_indices(args, total_games: int) -> List[str]:
     Determines game indices to load based on user arguments.
     
     Args:
-    args: Command line arguments or equivalent.
-    total_games (int): Total number of games available.
-    
+    ---------------------------------------------------------------------------
+        args: Command line arguments or equivalent.
+        total_games (int): Total number of games available.
+        
     Returns:
-    List[int]: List of game indices to be loaded.
-    
-    Pre-conditions:
-    - args should contain parameters to specify game selection (all, range, or single).
-    
-    Post-conditions:
-    - Returns a list of integers representing game indices.
+    ---------------------------------------------------------------------------
+        List[int]: List of game indices to be loaded.
     """
     
     if args.all_games:
@@ -157,20 +144,16 @@ def solve_game(rush_game: RushHour, algorithm: str, max_depth: int =1000,\
     Solves a Rush Hour game using a specified algorithm.
     
     Args:
-    rush_game (RushHour): The Rush Hour game to solve.
-    algorithm (str): The name of the algorithm to use for solving.
-    max_depth (int): Maximum depth for depth-related algorithms.
-    max_iterations (int): Maximum iterations for iteration-based algorithms.
-    
+    ---------------------------------------------------------------------------
+        rush_game (RushHour): The Rush Hour game to solve.
+        algorithm (str): The name of the algorithm to use for solving.
+        max_depth (int): Maximum depth for depth-related algorithms.
+        max_iterations (int): Maximum iterations for iteration-based algorithms.
+        
     Returns:
-    Tuple[Optional[Dict[str, any]], int]: Tuple containing the solution details and status code.
-    
-    Pre-conditions:
-    - rush_game should be an initialized instance of RushHour.
-    - algorithm should be one of the recognized algorithm names.
-    
-    Post-conditions:
-    - Returns solution details and a status code (0 for success, 1 for failure).
+    ---------------------------------------------------------------------------
+        Tuple[Optional[Dict[str, any]], int]: Tuple containing the solution 
+        details and status code.
     """
     
     start_time = time.perf_counter()
@@ -203,21 +186,15 @@ def solve_rush_hour_games(rush_games: List[RushHour], algorithm: str, repeat: in
     Solves multiple Rush Hour games using the specified algorithm.
     
     Args:
-    rush_games (Generator[RushHour, None, None]): Generator of Rush Hour games.
-    algorithm (str): The algorithm to use for solving the games.
-    repeat (int): Number of times to repeat solving each game.
-    
+    ---------------------------------------------------------------------------
+        rush_games (Generator[RushHour, None, None]): Generator of Rush Hour games.
+        algorithm (str): The algorithm to use for solving the games.
+        repeat (int): Number of times to repeat solving each game.
+        
     Returns:
-    Tuple[Dict[str, List[float]], int, List[Optional[Dict[str, any]]]]: Tuple containing
-    statistics, the count of unsolved games, and the list of solutions.
-    
-    Pre-conditions:
-    - rush_games should be a generator yielding RushHour instances.
-    - algorithm should be a valid algorithm name.
-    - repeat should be a positive integer.
-    
-    Post-conditions:
-    - Returns game solving statistics, unsolved game count, and solutions.
+    ---------------------------------------------------------------------------
+        Tuple[Dict[str, List[float]], int, List[Optional[Dict[str, any]]]]: Tuple 
+        containing statistics, the count of unsolved games, and the list of solutions.
     """
     
     stats = {"times": [], "steps": [], "visited": [],}

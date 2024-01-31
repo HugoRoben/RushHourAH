@@ -36,7 +36,8 @@ def main():
     results.visualize(stats, args.algorithm)
     results.desc_stats(stats, unsolved_count, args.algorithm)
     
-    results.plot_steps_histogram(stats['steps'], args.algorithm)
+    if args.algorithm == 'random':
+        results.plot_steps_histogram(stats['steps'], args.algorithm)
     
     if solutions:
         visualizer = Visualizer(600, 600)
