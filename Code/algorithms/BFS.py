@@ -6,27 +6,16 @@ def breadth_first_search(RushGame: RushHour, max_depth: int =100) -> str:
     Perform a breadth-first search to solve the Rush Hour puzzle.
 
     Args:
-    RushGame (RushGame): An instance of the Rush Hour puzzle game, which should have 
-        methods is_solved and moves.
-    max_depth (int): The maximum depth to search in the puzzle.
-
-    Pre-conditions:
-    - RushGame must have an is_solved method that returns a boolean indicating whether
-        the puzzle is solved.
-    - RushGame must have a moves method that returns an iterable of possible next states.
-    - max_depth should be a positive integer.
-
-    Post-conditions:
-    - Returns a dictionary containing:
-      - 'visited': Total number of visited states (int).
-      - 'solution': A tuple representing the path to the solution (if found) 
-            (tuple of RushGame states).
-      - 'depth_states': A dictionary mapping each depth level to the number of states 
-            visited at that depth (Dict[int, int]).
+    ---------------------------------------------------------------------------
+        RushGame (RushGame): An instance of the Rush Hour puzzle game, which 
+            should have methods is_solved and moves.
+        max_depth (int): The maximum depth to search in the puzzle.
 
     Returns:
-    Dict[str, any]: A dictionary with details about the search including the number of 
-        visited states, the solution (if found), and states visited per depth level.
+    ---------------------------------------------------------------------------
+        Dict[str, any]: A dictionary with details about the search including the
+            number of visited states, the solution (if found), and states visited 
+            per depth level.
     """
     
     visited_states = set()
@@ -47,20 +36,19 @@ def breadth_first_search(RushGame: RushHour, max_depth: int =100) -> str:
             visited_states.add(current_board)
 
             if current_board.is_solved():
-                print(current_board)
                 solution = current_path
                 break
             else:
                 for move in current_board.moves():
                     visit_queue.appendleft((move, path + (current_board,)))
-
     return {
         'visited': len(visited_states),
         'solution': solution,
         'depth_states': states_per_depth
     }
 
-# We can keep track of the steps taken at each move with the following code:
+# To get a deeper understanding on what happens at each move, we can keep track of the 
+# steps taken at each move with the following code:
 #
 # def track_path(end_state):
 #     current_board = end_state

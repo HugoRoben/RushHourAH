@@ -9,6 +9,7 @@ from ..classes.VehicleClass import Vehicle
 import heapq
 from typing import Optional, List, Set
 from ..visual.visualizer import *
+
 class HeapItem:
     """
     Represents an item in the heap used in the A* search algorithm, with a
@@ -360,7 +361,7 @@ class Astar:
 
             for state in future_states:
                 # if a state is a winning state, break and return path
-                if state.is_solvable() or self.is_winning_state(state):
+                if state.is_solved():
                     heapq.heappush(open_states, HeapItem(-50, state))
                 # check if state is not yet visited or in set with open states
                 if state not in closed_states and state not in open_set:

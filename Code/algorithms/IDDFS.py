@@ -1,29 +1,19 @@
 from collections import deque
-from .Astar import *
+from ..classes.RushClass import RushHour
 
 def iterative_deepening_search(RushGame: RushHour, max_depth: int=500):
     """
     Performs an iterative deepening search on the Rush Hour game.
 
     Args:
-    RushGame (RushGame): An instance of the Rush Hour game.
-    max_depth (int, optional): The maximum depth for the search. Defaults to 500.
+    ---------------------------------------------------------------------------
+        RushGame (RushGame): An instance of the Rush Hour game.
+        max_depth (int, optional): The maximum depth for the search. Defaults to 500.
 
     Returns:
-    Dict[str, any]: A dictionary containing the search statistics,
-    including the total visited states, the solution (if found),
-    and states per depth.
-
-    Precondition:
-    - RushGame must be an initialized instance of the RushGame class.
-    - max_depth must be a positive integer.
-
-    Postcondition:
-    - Returns a dictionary with keys 'visited', 'solution', and 'depth_states'.
-    - 'visited' is an integer representing the total number of visited states.
-    - 'solution' is a tuple of states representing the solution, or None if no solution is found.
-    - 'depth_states' is a dictionary with depth as the key and the number of visited states
-        at that depth as the value.
+    ---------------------------------------------------------------------------
+        Dict[str, any]: A dictionary containing the search statistics, including 
+        the total visited states, the solution (if found), and states per depth.
     """
     
     states_per_depth = {}
@@ -56,7 +46,7 @@ def iterative_deepening_search(RushGame: RushHour, max_depth: int=500):
 
     total_visited = sum(states_per_depth.values())
     return {
-        'visited': total_visited,
+        'visited': len(visited_states),
         'solution': solution,
         'depth_states': states_per_depth
     }

@@ -1,9 +1,7 @@
 import argparse
-import matplotlib.pyplot as plt
 from Code.visual import results
-from Code.algorithms.solvers import *
+from Code.algorithms.solvers import load_game_data, solve_rush_hour_games
 from Code.visual.visualizer import Visualizer
-import cProfile
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Run Rush Hour solver algorithms.")
@@ -23,8 +21,6 @@ def parse_arguments():
     parser.add_argument("--all_games", help="Solve all games", action="store_true")
     return parser.parse_args()
 
-
-
 def main():
     args = parse_arguments()
     rush_games = load_game_data(args)
@@ -39,17 +35,14 @@ def main():
 
     results.visualize(stats, args.algorithm)
     results.desc_stats(stats, unsolved_count, args.algorithm)
-
-    # for solution in solutions:
-    #     visualizer = Visualizer(600, 600)
-    #     visualizer.animate_solution(solution)
+    
+    if args.algorithm == 'random':
+        results.plot_steps_histogram(stats['steps'], args.algorithm)
     
     if solutions:
         visualizer = Visualizer(600, 600)
-        
         visualizer.animate_solution(solutions)
 
 
 if __name__ == "__main__":
     main()
-    # cProfile.run('main()')
