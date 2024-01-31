@@ -223,7 +223,7 @@ class RushHour(object):
                     return False
             return True
         # for 6x6 boards
-        if self.dim_board == 6 and self.blockers[0].x == 5 and len(self.blockers) == 1:
+        if self.dim_board == 6 and len(self.blockers) == 1 and self.blockers[0].x == 5:
             blocker = self.blockers[0]
             if blocker.y == 0:
                 return not ({(5, 3), (5, 4), (5,5)}.intersection(self.occupied_coords))

@@ -256,7 +256,7 @@ class Astar:
             length_weight = 2
         if extra_cost_long_cars == 0:
             distance_weight = 2
-
+            
         '''9x9 5'''
         # if extra_cost_long_cars >= 1:
         #     distance_weight = -2
@@ -342,8 +342,7 @@ class Astar:
 
             # check if the game is won or the game is in a state where it is
             # directly solvable
-            if self.is_winning_state(current_state) or\
-                            current_state.is_solvable():
+            if current_state.is_solved():
                 # reconstruct the path taken for the solution
                 solution_path = self.reconstruct_path(current_state)
                 print(current_state)
