@@ -330,6 +330,7 @@ class RushHour(object):
         if self.dim_board == 9 or self.dim_board == 12:
             for blocker in self.blockers:
                 if blocker.length == 3:
+
                     if blocker.y == exit_row - 2:
                         coords_up = {(blocker.x, blocker.y - 1)}
                         coords_down = {(blocker.x, blocker.y + i) for i in range(3, 6)}
