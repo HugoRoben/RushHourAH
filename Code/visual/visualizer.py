@@ -1,9 +1,3 @@
-'''
-Class representing the visualisation of a solution for a rush hour game.
-The class draws each state in a solution path and animates the states
-after each other to see the path taken for the solution.
-'''
-
 import pygame
 import random
 from ..classes.RushClass import RushHour
@@ -14,6 +8,7 @@ def random_color() -> Tuple[int, int, int]:
     Generates a random colour for the vehicles.
     
     Returns:
+    ---------------------------------------------------------------------------
         Tuple[int, int, int]: A tuple representing the RGB color values.
     """
     # lower max red value to keep clear distinction from the red car
@@ -26,6 +21,7 @@ class Visualizer:
         Initialize the Visualizer.
 
         Args:
+        -----------------------------------------------------------------------
             width (int): The width of the game window.
             height (int): The height of the game window.
         """
@@ -52,7 +48,7 @@ class Visualizer:
 
     def draw(self, rush_hour_state: RushHour):
         """
-        Draws the board on screen given the configuration of the vehicles.
+        Draws the board on screen given the vehicles of the state.
 
         Args:
         -----------------------------------------------------------------------

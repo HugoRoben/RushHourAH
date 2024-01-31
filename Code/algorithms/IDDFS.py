@@ -1,7 +1,9 @@
 from collections import deque
 from ..classes.RushClass import RushHour
+from typing import Union, Dict, List
 
-def iterative_deepening_search(RushGame: RushHour, max_depth: int=500):
+def iterative_deepening_search(RushGame: RushHour, max_depth: int=500)\
+    -> Dict[str, Union[int, List[RushHour], Dict[int, List[RushHour]]]]:
     """
     Performs an iterative deepening search on the Rush Hour game.
 
@@ -12,8 +14,9 @@ def iterative_deepening_search(RushGame: RushHour, max_depth: int=500):
 
     Returns:
     ---------------------------------------------------------------------------
-        Dict[str, any]: A dictionary containing the search statistics, including 
-        the total visited states, the solution (if found), and states per depth.
+        Dict[str, Union[int, List[RushHour], Dict[int, List[RushHour]]]]:
+        A dictionary the total visited states, the solution (if found), and 
+        states per depth.
     """
     
     states_per_depth = {}

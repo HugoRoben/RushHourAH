@@ -1,10 +1,10 @@
-import argparse
+from argparse import Namespace, ArgumentParser
 from Code.visual import results
 from Code.algorithms.solvers import load_game_data, solve_rush_hour_games
 from Code.visual.visualizer import Visualizer
 
-def parse_arguments():
-    parser = argparse.ArgumentParser(description="Run Rush Hour solver algorithms.")
+def parse_arguments() -> Namespace:
+    parser = ArgumentParser(description="Run Rush Hour solver algorithms.")
 
     # Common parser arguments
     parser.add_argument("file_type", help="Type of file (csv or txt)", type=str)

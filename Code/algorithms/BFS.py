@@ -1,7 +1,9 @@
 from collections import deque
 from ..classes.RushClass import RushHour
+from typing import Union, Dict, List
 
-def breadth_first_search(RushGame: RushHour, max_depth: int =100) -> str:
+def breadth_first_search(RushGame: RushHour, max_depth: int =100)\
+    -> Dict[str, Union[int, List[RushHour], Dict[int, List[RushHour]]]]:
     """
     Perform a breadth-first search to solve the Rush Hour puzzle.
 
@@ -13,34 +15,38 @@ def breadth_first_search(RushGame: RushHour, max_depth: int =100) -> str:
 
     Returns:
     ---------------------------------------------------------------------------
-        Dict[str, any]: A dictionary with details about the search including the
-            number of visited states, the solution (if found), and states visited 
-            per depth level.
+        Dict[str, Union[int, List[RushHour], Dict[int, List[RushHour]]]]: A 
+        dictionary including the number of visited states, the solution 
+        (if found), and states visited per depth level.
     """
     
     visited_states = set()
     states_per_depth = {}
 
     visit_queue = deque()
+    # add the intitial state to the visit_que
     visit_queue.appendleft((RushGame, tuple()))
 
     while len(visit_queue) != 0:
-        current_board, path = visit_queue.pop()
-        current_path = path + (current_board,)
+        current_state, path = visit_queue.pop()
+        current_path = path + (current_state,)
 
         depth = len(current_path)
         if depth > max_depth:
             break
+        
+        # check if the state is not already seen
+        if current_state not in visited_states:
+            # add the state to visited states
+            visited_states.add(current_state)
 
-        if current_board not in visited_states:
-            visited_states.add(current_board)
-
-            if current_board.is_solved():
+            if current_state.is_solved():
                 solution = current_path
                 break
             else:
-                for move in current_board.moves():
-                    visit_queue.appendleft((move, path + (current_board,)))
+                # add all possible moves from the state to the queue
+                for move in current_state.moves():
+                    visit_queue.appendleft((move, path + (current_state,)))
     return {
         'visited': len(visited_states),
         'solution': solution,

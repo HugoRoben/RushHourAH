@@ -1,14 +1,16 @@
 import time
 import csv
 from tqdm import tqdm
-from Code.algorithms.IDDFS import *
+from Code.algorithms.IDDFS import iterative_deepening_search
 from Code.classes.VehicleClass import Vehicle
 from Code.classes.RushClass import RushHour
-from Code.algorithms.Random import iterative_deepening_search
+from Code.algorithms.Random import random_solve_puzzle
 from Code.algorithms.BFS import breadth_first_search
-from Code.algorithms.Astar import *
+from Code.algorithms.Astar import Astar
+from argparse import Namespace
+from typing import List
 
-def load_game_data(args):
+def load_game_data(args: Namespace):
     """
     Loads game data based on specified file type and arguments.
     
@@ -25,6 +27,7 @@ def load_game_data(args):
     file_type = args.file_type.lower()
     
     if file_type == 'csv':
+        # check if all arguments are filled
         if not all([args.dimension, args.board_number]):
             print("Please specify both dimension and board number for CSV files.")
             return None
@@ -32,6 +35,7 @@ def load_game_data(args):
         return load_csv_file(file_path, args.dimension)
         
     elif file_type == 'txt':
+        # check if all arguments are filled
         if not (args.single_game or args.game_range or args.all_games):
             print("Please specify one of --single_game, --game_range, or --all_games for TXT files.")
             return None
@@ -47,7 +51,7 @@ def load_game_data(args):
             return None
 
 
-def load_csv_file(rushhour_file, dimension) -> RushHour:
+def load_csv_file(rushhour_file: str, dimension: int) -> RushHour:
     """
     Loads Rush Hour game instances from a CSV file.
     
@@ -72,7 +76,7 @@ def load_csv_file(rushhour_file, dimension) -> RushHour:
     yield RushHour(set(vehicles), dimension)
 
 
-def load_txt_file(file_path, game_indices: int, dimension: int =6) -> RushHour:
+def load_txt_file(file_path: str, game_indices: int, dimension: int =6) -> RushHour:
     """
     Loads Rush Hour games from a text file.
     

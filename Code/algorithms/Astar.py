@@ -1,14 +1,7 @@
-'''
-Class that performs a (weighted) A* search algorithm based on the 
-cost of cars blocking the red car, the length of the cars
-blocking the red car and the distance of the red car to the exit.
-'''
-
 from ..classes.RushClass import RushHour
 from ..classes.VehicleClass import Vehicle
 import heapq
-from typing import Optional, List, Set
-from ..visual.visualizer import *
+from typing import Optional, List, Set, Dict, Union
 
 class HeapItem:
     """
@@ -20,11 +13,6 @@ class HeapItem:
         priority (int): The priority of this item in the heap.
         rush_hour_obj (RushHour): The Rush-Hour game state associated with this
         heap item.
-
-    Methods:
-    ---------------------------------------------------------------------------
-        __lt__: Defines the less-than comparison between two HeapItem objects
-                based on priority.
     """
     def __init__(self, priority: int, rush_hour_obj: RushHour):
         self.priority = priority
@@ -35,34 +23,16 @@ class HeapItem:
 
 class Astar:
     """
-    Implements the A* search algorithm for solving the Rush Hour puzzle.
+    Implements a weighted A* search algorithm for solving the Rush Hour puzzle, 
+    using heuristics based on the cost of cars blocking the red car, the length
+    of these cars, and the distance of the red car to the exit.
 
     Attributes:
     ---------------------------------------------------------------------------
-        - begin_state (RushHour): The initial state of the Rush Hour game.
-        - vehicles (Set[Vehicle]): A set of vehicles in the game.
-
-    Methods:
-    ---------------------------------------------------------------------------
-        - blocking_cars_iterative: Returns a set of all cars blocking the path
-        iteratively up to a given depth.
-        - is_blocking: Checks if one vehicle is blocking another.
-        - is_horizontally_blocking: Checks if a horizontally oriented vehicle
-        is blocking another.
-        - is_vertically_blocking: Checks if a vertically oriented vehicle is
-        blocking another.
-        - three_long_blockers: Counts how many cars of length three are
-        blocking the red car.
-        - Manhattan_distance_to_exit: Computes the Manhattan distance of the
-        red car to the exit.
-        - total_heuristic_function: Computes the heuristic cost for a given
-        state.
-        - is_winning_state: Checks if the current state is a winning state.
-        - reconstruct_path: Reconstructs the path from the end state to the
-        beginning.
-        - astar_search_single_ended: Performs the A* search algorithm to solve
-        the Rush Hour game.
+        begin_state (RushHour): The initial state of the Rush Hour game.
+        vehicles (Set[Vehicle]): A set of vehicles in the game.
     """
+
     def __init__(self, begin_state: RushHour) -> None:
         """
         Initializes the Astar instance with the initial Rush Hour state.
@@ -73,52 +43,7 @@ class Astar:
         """
         self.begin_state = begin_state
         self.vehicles = begin_state.vehicles
-        self.left = False
 
-    def is_red_car_left(self, state: RushHour) -> bool:
-        red_car = state.red_car
-        if red_car.x <= 3: self.left = True
-
-    def blocking_cars_iterative(self, state: RushHour, max_depth: int)\
-                                                        -> Set[Vehicle]:
-        """
-        Iteratively find all cars blocking other cars, starting with cars
-        blocking the 'X' car up to the max_depth.
-
-        Args:
-        -----------------------------------------------------------------------
-            state (RushHour): The Rush Hour game state.
-            max_depth (int): The maximum depth to search for blocking cars.
-
-        Returns:
-        -----------------------------------------------------------------------
-            Set[Vehicle]: A set of all vehicles blocking other vehicles.
-        """
-        # keep track of the vehicles already considered as blockers
-        already_considered = set()
-        # start with the cars directly blocking the red car as current blockers
-        current_level_blockers = set(state.blockers)
-
-        all_blockers = set(current_level_blockers)
-        already_considered.update(current_level_blockers)
-
-        for depth in range(2, max_depth + 1):
-            next_level_blockers = set()
-            # iterate through current blockers to find what cars block the cars
-            # in current_blockers
-            for blocker in current_level_blockers:
-                for v in state.vehicles:
-                    if self.is_blocking(blocker, v) and\
-                                v not in already_considered:
-                        # add new found blocking car
-                        next_level_blockers.add(v)
-                        already_considered.add(v)
-
-            current_level_blockers = next_level_blockers
-            # add current blockers to all blockers
-            all_blockers.update(current_level_blockers)
-        return all_blockers
-    
     def is_blocking(self, v: Vehicle, blocker: Vehicle) -> bool:
         """
         Check if 'blocker' is blocking 'v'.
@@ -194,7 +119,47 @@ class Astar:
         if target.orientation == 'H':
             return blocker.x == target.x + target.length or\
                 blocker.x == target.x - 1
+        
+    def blocking_cars_iterative(self, state: RushHour, max_depth: int)\
+                                                        -> Set[Vehicle]:
+        """
+        Iteratively finds all cars blocking other cars, starting with cars
+        blocking the 'X' car up to the max_depth.
 
+        Args:
+        -----------------------------------------------------------------------
+            state (RushHour): The Rush Hour game state.
+            max_depth (int): The maximum depth to search for blocking cars.
+
+        Returns:
+        -----------------------------------------------------------------------
+            Set[Vehicle]: A set of all vehicles blocking other vehicles.
+        """
+        # keep track of the vehicles already considered as blockers
+        already_considered = set()
+        # start with the cars directly blocking the red car as current blockers
+        current_level_blockers = set(state.blockers)
+
+        all_blockers = set(current_level_blockers)
+        already_considered.update(current_level_blockers)
+
+        for depth in range(2, max_depth + 1):
+            next_level_blockers = set()
+            # iterate through current blockers to find what cars block the cars
+            # in current_blockers
+            for blocker in current_level_blockers:
+                for v in state.vehicles:
+                    if self.is_blocking(blocker, v) and\
+                                v not in already_considered:
+                        # add new found blocking car
+                        next_level_blockers.add(v)
+                        already_considered.add(v)
+
+            current_level_blockers = next_level_blockers
+            # add current blockers to all blockers
+            all_blockers.update(current_level_blockers)
+        return all_blockers
+    
     def three_long_blockers(self, state: RushHour) -> int:
         """
         Calculate how many of the cars blocking the red car directly
@@ -226,8 +191,7 @@ class Astar:
         -----------------------------------------------------------------------
             int: The Manhattan distance to the exit.
         """
-        red_car = state.red_car
-        return (state.dim_board - 2 - red_car.x)
+        return (state.dim_board - 2 - state.red_car.x)
     
     def total_cost_function(self, state: RushHour) -> int:
         """
@@ -245,44 +209,21 @@ class Astar:
         length_weight = 1
         distance_weight = 1
         blocker_weight = 1
+
         # calculate the different costs
         blocking_cost = len(self.blocking_cars_iterative(state, 3))
         extra_cost_long_cars = self.three_long_blockers(state)
         distance_cost = self.Manhattan_distance_to_exit(state)
-        # if blocking cars with length three, change weights
 
-        '''9x9 4'''
+        # determine te weights based on the current state
         if extra_cost_long_cars >= 1:
             distance_weight = -1
             length_weight = 2
         if extra_cost_long_cars == 0:
             distance_weight = 2
-            
-        '''9x9 5'''
-        # if extra_cost_long_cars >= 1:
-        #     distance_weight = -2
-        #     length_weight = 2
-        # if extra_cost_long_cars == 0:
-        #     distance_weight = 2   
 
         return blocking_cost * blocker_weight + distance_cost * distance_weight +\
                     extra_cost_long_cars * length_weight
-
-    def is_winning_state(self, state: RushHour) -> bool:
-        """
-        Check if the 'X' vehicle (red car) can exit the board by checking if
-        there are no more cars blocking the way to the
-
-        Args:
-        -----------------------------------------------------------------------
-            state (RushHour): The Rush Hour game state.
-
-        Returns:
-        -----------------------------------------------------------------------
-            bool: True if the game is won, False otherwise.
-        """
-        # if no more blocking cars, game is won
-        return len(state.blockers) == 0
     
     def reconstruct_path(self, end_state: RushHour) -> List[RushHour]:
         """
@@ -308,8 +249,8 @@ class Astar:
             current_state = current_state.parent
         return path
             
-    def astar_search(self, initial_state: RushHour,\
-                    max_iterations: int=100000000) -> Optional[List[RushHour]]:
+    def astar_search(self, initial_state: RushHour, max_iterations: int=100000000)\
+                -> Optional[Dict[str, Union[int, List[RushHour]]]]:
         """
         Performs A* search algorithm to solve the Rush Hour game.
 
@@ -341,8 +282,7 @@ class Astar:
             # pop the state with the lowest cost from the list
             current_state = heapq.heappop(open_states).rush_hour_obj
 
-            # check if the game is won or the game is in a state where it is
-            # directly solvable
+            # check if the game is won
             if current_state.is_solved():
                 # reconstruct the path taken for the solution
                 solution_path = self.reconstruct_path(current_state)
@@ -358,11 +298,11 @@ class Astar:
             # states specified by depth
             future_states = current_state.generate_future_states(current_state,\
                                                                  depth=1)
-
             for state in future_states:
-                # if a state is a winning state, break and return path
-                if state.is_solved():
-                    heapq.heappush(open_states, HeapItem(-50, state))
+                # if a state is directly solvable, assign low cost to add to 
+                # the front of the list
+                if state.is_solvable():
+                    heapq.heappush(open_states, HeapItem(-100, state))
                 # check if state is not yet visited or in set with open states
                 if state not in closed_states and state not in open_set:
                     # calculate cost of the state and add to the list

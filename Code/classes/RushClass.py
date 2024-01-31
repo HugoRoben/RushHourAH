@@ -1,49 +1,124 @@
-'''
-Class representing a game of rush hour. The class includes a 2D representation
-of the board in a state, generates all possible moves in a state, and checks
-if a game is won.
-'''
-from Code.classes.VehicleClass import Vehicle
-from typing import Tuple, Set, Optional, List
+from typing import Tuple, Set, Optional, List, Iterable
 from bisect import insort
+from Code.classes.VehicleClass import Vehicle
 
 class RushHour(object):
-    """A configuration of a single Rush Hour board."""
+    """
+    Represents a single Rush Hour board configuration.
+    
+    Attributes:
+    ---------------------------------------------------------------------------
+        vehicles (List[Vehicle]): Sorted list of vehicles on the board.
+        dim_board (int): Dimension of the board (6, 9, or 12).
+        parent (Optional[RushHour]): Parent state if current state has parent.
+        occupied_coords (Set[Tuple[int, int]]): Set of occupied coordinates on 
+        the board.
+        red_car (Optional[Vehicle]): The red car in the game.
+        blockers (List[Vehicle]): Vehicles blocking the red car's path to the 
+        exit.
+    """
 
-    def __init__(self, vehicles: set, dimension: int, parent: 'RushHour' = None, occupied_coords: set = None):
+    def __init__(self, vehicles: set, dimension: int, parent: 'RushHour' = None,\
+                                                occupied_coords: set = None):
+        """
+        Initializes a Rush Hour board state.
+
+        Args:
+        -----------------------------------------------------------------------
+            vehicles (Set[Vehicle]): A set of vehicles.
+            dimension (int): The dimension of the board.
+            parent (Optional[RushHour]): The parent state, default is None.
+            occupied_coords (Optional[Set[Tuple[int, int]]]): set 
+            of occupied coordinates, default is None.
+        """
         # self.vehicles = vehicles
         self.vehicles = sorted(vehicles, key=lambda v: v.id)
         self.dim_board = dimension
         self.parent = parent
         self.red_car = self.get_red_car()
         self.blockers = self.get_cars_blocking_red()
-        # get occupied coordinates from vehicles if first initialisation of the game
+        # get occupied coordinates from vehicles if first initialisation of 
+        # the game
         if occupied_coords == None:
             self.occupied_coords = self.get_occupied_coords_set()
         else: 
             self.occupied_coords = occupied_coords
 
-    def get_vehicle_coords(self, vehicle: Vehicle) -> Tuple[str, str]:
+    def get_vehicle_coords(self, vehicle: Vehicle) -> Tuple[int, int]:
+        """
+        Computes the set of tuples of coordinates occupied by a vehicle.
+
+        Args:
+        -----------------------------------------------------------------------
+            vehicle (Vehicle): The vehicle to compute coordinates for.
+
+        Returns:
+        -----------------------------------------------------------------------
+            Set[Tuple[int, int]]: set of coordinates occupied by the vehicle.
+        """
         return {(vehicle.x + i, vehicle.y) if vehicle.orientation == 'H'\
                 else (vehicle.x, vehicle.y + i) 
             for i in range(vehicle.length)}
 
-    def get_occupied_coords_set(self) -> Set[Tuple]:
+    def get_occupied_coords_set(self) -> Set[Tuple[int, int]]:
+        """
+        Computes the set of all occupied coordinates on the board.
+
+        Returns:
+        -----------------------------------------------------------------------
+            Set[Tuple[int, int]]: A set of all coordinates occupied by vehicles.
+        """
+        # map all the vehicles in self.vehicles to get_vehicle_coords
         return set().union(*map(self.get_vehicle_coords, self.vehicles))
     
-    def __eq__(self, other: 'RushHour'):
+    def __eq__(self, other: 'RushHour') -> bool:
+        """
+        Checks equality with another RushHour instance based on vehicles.
+
+        Args:
+        -----------------------------------------------------------------------
+            other (RushHour): Another RushHour instance to compare with.
+
+        Returns:
+        -----------------------------------------------------------------------
+            bool: True if the vehicles are in the same positions, 
+            False otherwise.
+        """
         if not isinstance(other, RushHour):
             return False
         return self.vehicles == other.vehicles
 
-    def __ne__(self, other: 'RushHour'):
+    def __ne__(self, other: 'RushHour') -> bool:
+        """
+        Checks inequality with another RushHour instance.
+
+        Args:
+            other (RushHour): Another RushHour instance to compare with.
+
+        Returns:
+        -----------------------------------------------------------------------
+            bool: True if vehicles are not in the same positions,
+            False otherwise.
+        """
         return not self.__eq__(other)
 
-    def __hash__(self):
+    def __hash__(self) -> int:
+        """
+        Creates a hash for the board state based on vehicle position and id.
+
+        Returns:
+            int: The hash value of the board state.
+        """
         board_str = ''.join(f'{v.id}{v.x}{v.y}' for v in self.vehicles)
         return hash(board_str)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
+        """
+        Provides a string representation of the board state.
+
+        Returns:
+            str: The string representation of the board.
+        """
         board = self.get_board()
         board_str = '-' * (self.dim_board + 2) + '\n'
         for row in board:
@@ -52,13 +127,21 @@ class RushHour(object):
         return board_str
     
     def get_board(self):
-        """Representation of the Rush Hour board as a 2D list of strings"""
+        """
+        Generates a 2D list representation of the board with empty tiles and
+        vehicle ids.
+
+        Returns:
+        -----------------------------------------------------------------------
+            List[List[str]]: The 2D list representing the board.
+        """
         # start with an empty board
         board = [[' ' for _ in range(self.dim_board)] for _ in range(self.dim_board)]
         # add the id of the vehicles to the board on the corresponding tiles
         for vehicle in self.vehicles:
             for i in range(vehicle.length):
-                coord = (vehicle.x + i, vehicle.y) if vehicle.orientation == 'H' else (vehicle.x, vehicle.y + i)
+                coord = (vehicle.x + i, vehicle.y) if vehicle.orientation == 'H'\
+                                                else (vehicle.x, vehicle.y + i)
                 board[coord[1]][coord[0]] = vehicle.id
         return board
     
@@ -98,8 +181,15 @@ class RushHour(object):
                     blocking_cars.append(v)
         return blocking_cars
 
-    def moves(self):
-        """Return iterator of next possible moves."""
+    def moves(self) -> Iterable['RushHour']:
+        """
+        Generates possible next moves (states) from the current state.
+
+        Returns:
+        -----------------------------------------------------------------------
+            Iterable[RushHour]: An iterable of RushHour instances representing 
+            new states after the possible moves.
+        """
         for v in self.vehicles:
             # horziontal moves
             if v.orientation == 'H':
@@ -125,8 +215,20 @@ class RushHour(object):
                     new_coords = (v.x, v.y + v.length)
                     yield from self.perform_move(v, new_v, (v.x, v.y), new_coords)
     
-    def is_valid_move(self, v: Vehicle, direction: str):
-        '''Checks if move is valid given Vehicle and direction'''
+    def is_valid_move(self, v: Vehicle, direction: str) -> bool:
+        """
+        Checks if a move for a given vehicle in a specified direction is valid.
+
+        Args:
+        -----------------------------------------------------------------------
+            v (Vehicle): The vehicle to move.
+            direction (str): The direction of the move ('left', 'right', 'up',
+            'down').
+
+        Returns:
+        -----------------------------------------------------------------------
+            bool: True if the move is valid, False otherwise.
+        """
         # check horizontal moves
         if v.orientation == 'H':
             if direction == 'left':
@@ -140,8 +242,23 @@ class RushHour(object):
             if direction == 'down':
                 return v.y - 1 >= 0 and (v.x, v.y - 1) not in self.occupied_coords
 
-    def perform_move(self, v: Vehicle, new_v: Vehicle, old_coords: tuple, new_coords: tuple):
-        '''Performs moves by yielding new states of the game'''
+    def perform_move(self, v: Vehicle, new_v: Vehicle, old_coords: Tuple[int, int],\
+                    new_coords: Tuple[int, int]) -> Iterable['RushHour']:
+        """
+        Performs a move by updating the vehicle's position and yields new Rush
+        Hour states.
+
+        Args:
+        -----------------------------------------------------------------------
+            v (Vehicle): The vehicle to be moved.
+            new_v (Vehicle): New vehicle with updated coordinates.
+            old_coords (Tuple[int, int]): Old coordinates of the vehicle.
+            new_coords (Tuple[int, int]): New coordinates of the vehicle.
+
+        Yields:
+        -----------------------------------------------------------------------
+            Iterable[RushHour]: New game states resulting from the move.
+        """
         # copy existing vehicles set
         new_vehicles = self.vehicles.copy()
         # remove vehicle to be moved and add back with updated coordinates
@@ -155,8 +272,20 @@ class RushHour(object):
         # yield the new state
         yield RushHour(new_vehicles, self.dim_board, parent=self, occupied_coords=new_occupied_coords)
 
-    def generate_future_states(self, current_state: 'RushHour', depth=3):
-        '''Allows to look a specified amount of states ahead from a certain state'''
+    def generate_future_states(self, current_state: 'RushHour', depth=3)\
+                                                        -> List['RushHour']:
+        """
+        Generates future states from the current state up to a specified depth.
+
+        Args:
+        -----------------------------------------------------------------------
+            current_state (RushHour): The current state.
+            depth (int): The depth for lookahead from the current state.
+
+        Returns:
+        -----------------------------------------------------------------------
+            List[RushHour]: A list of future states.
+        """
         # if depth is 0, no look ahead is required
         if depth == 0:
             return [current_state]
@@ -167,8 +296,15 @@ class RushHour(object):
             future_states.extend(self.generate_future_states(next_state, depth - 1))
         return future_states
     
-    def is_solved(self):
-        """Check if the puzzle is solved."""
+    def is_solved(self) -> bool:
+        """
+        Checks if the puzzle is solved, by checking if the red car can exit
+        the board.
+
+        Returns:
+        -----------------------------------------------------------------------
+            bool: True if the puzzle is solved, False otherwise.
+        """
         for vehicle in self.vehicles:
             if vehicle.id == 'X':
                 # check if red car is at the exit
@@ -177,23 +313,20 @@ class RushHour(object):
     
     def is_solvable(self) -> bool:
         """
-        Checks if there is only one blocking car left which can be moved to
-        solve the board. The function checks if in the last column of the board
-        there is only one car, of length 3, left which can be moved far enough
-        up or down to free the path to the exit.
+        Checks if the game is in a directly solvable state, specifically for larger boards (9x9, 12x12) and 
+        the standard 6x6. It assesses if the blocking cars can be moved to clear a path for the red car.
 
         Returns:
         -----------------------------------------------------------------------
-            bool: True if the game is solvable, False otherwise.
+            bool: True if the game is solvable from the current state, False otherwise.
         """
-       
-        # for 9x9 and 12x12 boards
-        # check if the blocking car is in a position it can move
-        # out of the free the exit
-        # without having to move other vehicles
-        if(self.dim_board // 2 == 0): exit_row = self.dim_board // 2 - 1
-        else: exit_row = self.dim_board // 2
+        exit_row = self.red_car.y
         
+        # for 9x9 and 12x12 boards
+        # check if the blocking car is in a position it can move out of, to 
+        # free the exit without having to move other vehicles
+        # a vehicle can move 'directly' out of the way if enough tiles above or
+        # beneath the vehicle are free
         if self.dim_board == 9 or self.dim_board == 12:
             for blocker in self.blockers:
                 if blocker.length == 3:
@@ -222,6 +355,7 @@ class RushHour(object):
                 (coords_down.intersection(self.occupied_coords)): 
                     return False
             return True
+        
         # for 6x6 boards
         if self.dim_board == 6 and len(self.blockers) == 1 and self.blockers[0].x == 5:
             blocker = self.blockers[0]
