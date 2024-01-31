@@ -2,12 +2,5 @@ tqdm
 matplotlib
 numpy
 pygame
-typing
-heapq
-collections
-random
-time
-csv
-argparse
 bisect
 

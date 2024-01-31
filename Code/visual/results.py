@@ -1,50 +1,36 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-def visualize(stats, algo, save_to_file=False):
-    times = stats['times']
-    steps = stats['steps']
-
-
-    if len(times) <= 1:
-        print("\nNot enough data for visualization.")
-        return
-
-    fig, axs = plt.subplots(1, 2, figsize=(15, 7))
-
-    log_times = np.log1p(times)
-    num_bins_time = min(500, len(np.unique(log_times)))
-    axs[0].hist(log_times, bins=num_bins_time, color='tab:blue', edgecolor='black')
-    axs[0].set_title(f'{algo}: Time Taken (s)')
-    axs[0].set_xlabel('Time (s)')
-    axs[0].set_ylabel('Frequency')
-
-    # Histogram for steps
-    num_bins_steps = min(500, len(np.unique(steps)))
-    axs[1].hist(steps, bins=num_bins_steps, color='tab:red', edgecolor='black')
-    axs[1].set_title(f'{algo}: Number of Steps')
-    axs[1].set_xlabel('Steps')
-    axs[1].set_ylabel('Frequency')
-
-    plt.subplots_adjust(wspace=0.4)
-    plt.suptitle(f'{algo} - Time Taken and Number of Steps', fontsize=16)
-
-    if save_to_file:
-        file_name = f'data/{algo}_test.png'
-        plt.savefig(file_name)
-        plt.close()
-        print(f"Plot saved as {file_name}")
-    # else:
-    #     plt.show()
-
-
 def format_stat(value):
-        if isinstance(value, float):
-            return f"{value:.3f}"
-        return str(value)
+    """
+    Format a statistical value to a string with 3 decimal places if it's a float.
 
+    Args:
+    ---------------------------------------------------------------------------
+        value (Union[float, int]): The value to format.
 
-def desc_stats(stats, unsolved_count, algo, save_to_file=True):
+    Returns:
+    ---------------------------------------------------------------------------
+        str: The formatted value as a string.
+    """
+    if isinstance(value, float):
+        return f"{value:.3f}"
+    return str(value)
+
+def desc_stats(stats, unsolved_count, algo, save_to_file=False):
+    """
+    Describe the statistics of puzzle solving attempts, including times, steps, 
+        and visited states.
+
+    Args:
+    ---------------------------------------------------------------------------
+        stats (Dict[str, List[Union[float, int]]]): A dictionary containing 
+            'times', 'steps', and 'visited' data.
+        unsolved_count (int): The number of puzzles that were not solved.
+        algo (str): The name of the algorithm used for the statistics.
+        save_to_file (bool, optional): Flag to determine if the statistics
+            should be saved to a file. Defaults to False.
+    """
     times = stats['times']
     steps = stats['steps']
     visited = stats['visited']
@@ -102,6 +88,16 @@ def desc_stats(stats, unsolved_count, algo, save_to_file=True):
         print(f"Statistics saved as {file_name}")
 
 def plot_steps_histogram(steps, algo, save_to_file=False):
+    """
+    Plot a histogram of the number of steps taken to solve puzzles for a given algorithm.
+
+    Args:
+    ----------------------------------------------------------------------------
+        steps (List[int]): A list of the number of steps taken for each puzzle.
+        algo (str): The name of the algorithm used for the statistics.
+        save_to_file (bool, optional): Flag to determine if the histogram should 
+            be saved to a file. Defaults to False.
+    """
     num_bins = 42
 
     fig, ax = plt.subplots()
