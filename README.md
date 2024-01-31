@@ -1,7 +1,8 @@
 # Rush Hour
 
 ## Introduction
-RushHourAH is a Python-based solver for the Rush Hour puzzle game. This project aims to implement and compare various algorithms to find solutions for different configurations of the Rush Hour game, a popular sliding block puzzle. Users can execute the solver with different algorithms, visualize the results, and analyze performance metrics. The primary objective is to move vehicles in a grid to free the red blocked vehicle and lead it to the exit by taking the least amount of steps.
+RushHourAH is a Python-based solver for the Rush Hour puzzle game. This project aims to implement and compare various algorithms to find solutions for different configurations of the Rush Hour game, a sliding block puzzle. Users can execute the solver with an Weighted A*, Breadth-first-search and an iterative deepening depth-first search algorithm. The solution can be visualised and animated in pygame. The primary objective is to move vehicles in a grid to free the red vehicle and lead it to the exit by taking the least amount of steps.\
+In the game veicles can not move over each other or move out of their row/column.
 
 ## Description
 
@@ -17,9 +18,8 @@ pip install -r requirements.txt
 ```
 
 ### Requirements
-- Each experiment is run using a Macbook Pro 13 inch 
 - Python 3
-- Libraries: `tqdm`, `matplotlib`, `numpy`, `pygame` (See `requirements.txt` for more details)
+- Libraries: See `requirements.txt` for the required packages
 
 ### Executing program
 
@@ -41,7 +41,7 @@ Commands used to print the results of each algorithm on the 6x6_3 board. (The ra
 - python3 main.py csv iddfs --dimension 6 --board 3
 - python3 main.py csv astar --dimension 6 --board 3
 
-We do the same for the 9x9_4 board and the 12x12_7 board, by replacing the  --dimension 6 --board 3 parts with  --dimension 9 --board 4 and  --dimension 12 --board 7 respectively.
+We do the same for the 9x9_4 board, by replacing the  --dimension 6 --board 3 parts with  --dimension 9 --board 4.
 
 Example commands on the bfs algorithm:
 - python3 main.py txt bfs --game_range '0-2'
@@ -55,11 +55,23 @@ Example commands on the bfs algorithm:
 ```
 
 ## Features
-- Multiple solving algorithms: A*, IDDFS, BFS, Random.
+- Solving algorithms: Weighted A*, IDDFS, BFS, Random.
 - Support for different game board dimensions.
 - Repeat execution for statistical analysis.
 - Visualization of solving process and results.
 - Performance metrics and statistics
+
+### Breadth-First-Search:
+BFS algorithm starts with the initial configuration of the board. It uses a queue to manage the exploration of game states, with the starting state being enqueued first. It keeps track of all visited states to prevent revisiting them.
+
+At each step, BFS dequeues the state at the front of the queue, generates all possible next states from legal moves, and enqueues these new states if they haven't been visited before. For every state, BFS checks if the state is a solution to the game, until a solution is found.
+
+### Iterative Deepening Depth-First Search
+IDDFS starts at the initial board configuration and explores states using depth-first search, with an increasing depth limit in each iteration. It goes into the game tree up to the depth limit If no solution is found, itbacktracks and deepens the search in the next iteration. This process continues until it finds the shortest solution.
+
+### Weighted A*
+The weighted A* algorithm begins with the initial board state and evaluates nest states based on a cost function. This cost is built out of cars vlocking the red car, the length of these cars and the distance to the exit. The total cost is than calculated with different weights, depending on the state of the board.
+At each step, A* expands the lowest cost node and explores its next states. The algorithm continues this process until it finds a path that leads the red car to the exit.
 
 ## Contributors
 This project has been developed and maintained by Joeri den Heijer, Hugo Röben and Mina Bibi.
