@@ -30,7 +30,7 @@ class Visualizer:
         self.clock = pygame.time.Clock()
         self.color_map = {}
 
-    def get_vehicle_color(self, car_id: str) -> Tuple(int, int, int):
+    def get_vehicle_color(self, car_id: str) -> Tuple[int, int, int]:
         """
         Check if car already has a colour assigned, if not call random_color.
 

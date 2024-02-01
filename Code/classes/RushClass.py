@@ -321,7 +321,7 @@ class RushHour(object):
             bool: True if the game is solvable from the current state, False otherwise.
         """
         exit_row = self.red_car.y
-        
+        if not self.blockers: return True
         # for 9x9 and 12x12 boards
         # check if the blocking car is in a position it can move out of, to 
         # free the exit without having to move other vehicles
@@ -358,7 +358,7 @@ class RushHour(object):
             return True
         
         # for 6x6 boards
-        if self.dim_board == 6 and len(self.blockers) == 1 and self.blockers[0].x == 5:
+        if self.dim_board == 6 and self.blockers[0].x == 5:
             blocker = self.blockers[0]
             if blocker.y == 0:
                 return not ({(5, 3), (5, 4), (5,5)}.intersection(self.occupied_coords))

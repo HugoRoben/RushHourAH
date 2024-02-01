@@ -217,7 +217,7 @@ class Astar:
 
         # determine te weights based on the current state
         if extra_cost_long_cars >= 1:
-            distance_weight = -2
+            distance_weight = -1
             length_weight = 2
         if extra_cost_long_cars == 0:
             distance_weight = 2
@@ -297,12 +297,13 @@ class Astar:
             # generate states to be visited, with option to generate look-ahead
             # states specified by depth
             future_states = current_state.generate_future_states(current_state,\
-                                                                 depth=2)
+                                                                 depth=1)
             for state in future_states:
                 # if a state is directly solvable, assign low cost to add to 
                 # the front of the list
                 if state.is_solvable():
-                    heapq.heappush(open_states, HeapItem(-100, state))
+                    heapq.heappush(open_states, HeapItem(-50, state))
+                    continue
                 # check if state is not yet visited or in set with open states
                 if state not in closed_states and state not in open_set:
                     # calculate cost of the state and add to the list

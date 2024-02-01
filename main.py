@@ -50,7 +50,6 @@ def main():
         return
 
     #  Visualize the statistics and describe them
-    results.visualize(stats, args.algorithm)
     results.desc_stats(stats, unsolved_count, args.algorithm)
     
     # If the algorithm used was 'random', plot a histogram of the steps taken
